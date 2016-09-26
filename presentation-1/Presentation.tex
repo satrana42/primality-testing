@@ -1,0 +1,339 @@
+\documentclass{beamer}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+
+\begin{document}
+
+\title{Primes and How to Reconginze them}
+\subtitle{Primality Testing Algorithms}
+\author{Satwant Rana\inst{1}\\[3mm] Advised by, Amitabha Tripathi\inst{2}}
+\institute
+{
+  \inst{1}
+  2012 MT 50618\\
+  Mathematics Department\\
+  IIT Delhi
+  \and
+  \inst{2}
+  Professor\\
+  Mathematics Department\\
+  IIT Delhi
+}
+\date
+{Mid Semester MTP Presentation, 2016}
+\subject{Mathematics}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Motivation}
+
+Prime numbers are central to Number Theory, acting as the atomic units around which all numbers are built. Therefore it is barely a surprise that \emph{Primality Testing} is a problem with a rich history in Number Theory.
+\\[3mm]
+The motivation behind this project is to rediscover and implement the greatest and the latest in primality testing algorithms.
+\end{frame}
+
+\begin{frame}
+\frametitle{Primes and Composites}
+Primes are defined as natural numbers which are only divisible by $1$ and themselves. Formally, given $p \in \mathbb{N}$ is a prime, if whenever $q \mid p$, then $q \in \{1, p\}$.
+\\[3mm]
+Any natural greater than $1$ which is not a prime is called a \emph{composite}.
+\end{frame}
+
+\begin{frame}
+\frametitle{A Naive Primality Test}
+
+\begin{algorithm}[H]
+\caption{Naive Primality Test}
+\label{alg:NaivePrimalityTest}
+\begin{algorithmic}
+\Procedure{NaivePrimalityTest}{$n$}
+\State $d\gets 2$
+\While {$d \leq n-1$}
+\State $r \gets n \mod d$
+\If {$r = 0$} 
+	\State \textbf{return} false \Comment{$n$ is composite}
+\EndIf
+\State $d \gets d+1$
+\EndWhile
+\State \textbf{return} true \Comment{$n$ is prime}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Time Complexity - $O(n)$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{An Optimization}
+
+If $n,a,b \in \mathbb{Z}$ such that $n = ab$, then $min(a,b) \leq \sqrt(n)$.
+
+\begin{algorithm}[H]
+\caption{Optimized Naive Primality Test}
+\label{alg:OptimizedNaivePrimalityTest}
+\begin{algorithmic}
+\Procedure{OptimizedNaivePrimalityTest}{$n$}
+\State $d\gets 2$
+\While {$d \leq \min(n-1,\sqrt n))$}
+\State $r\gets n \mod d$
+\If {$r = 0$} 
+	\State \textbf{return} false \Comment{$n$ is composite}
+\EndIf
+\State $d \gets d+1$
+\EndWhile
+\State \textbf{return} true \Comment{$n$ is prime}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Time Complexity - $O(\sqrt n)$
+\end{frame}
+
+\begin{frame}
+\frametitle{Compositeness Tests}
+
+A successful \emph{primality test} proves that a given number is prime, whereas a successful \emph{compositeness test} proves that a given number is composite. 
+\\[3mm]
+e.g. If $n > 2$ and $2 \mid n$, then $n$ is composite.
+\\[3mm]
+If a compositeness test is not successful, then we can't comment on the primality of the given number.
+\\[3mm]
+Composite numbers which the compositeness test labels as primes are called the \emph{pseudoprimes} for the test.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's (Little) Theorem}
+
+\begin{theorem}[Fermat's Theorem]
+\label{theorem:FermatLittleTheorem}
+Given prime $p$, and $a \in \mathbb{Z}$, $(a,p) = 1$ we have,
+\[ a^{p-1} \equiv 1 \mod p \]
+\end{theorem}
+
+\begin{corollary}[1]
+\label{corollary:BetterFermatLittleTheorem}
+Given prime $p$, and $a \in \mathbb{Z}$ we have,
+\[ a^p \equiv a \mod p \]
+\end{corollary}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's Theorem as a Compositeness Test}
+The following Corollary 2 is a simple compositeness test using \emph{Fermat's Theorem}. 
+\\[3mm]
+\begin{corollary}[2]
+\label{corollary:FermatLittleTheoremConverse}
+If $n \in \mathbb{N}$, $n \geq 2$ and $\exists a \in \mathbb{Z}$ such that,
+\[a^n \not\equiv a \mod n\]
+then $n$ is not a prime.  
+\end{corollary}
+\ \\[3mm]
+For instance, for $n = 9$, $2^9 \equiv 8 \not\equiv 2 \mod 9$, indicating the compositeness of $9$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat Pseudoprimes}
+
+There do exist combinations of $a$ and composite $n$ which satisfy the \emph{Fermat's Theorem}. 
+\\[3mm]
+For instance $n = 341 = 11.31$ gives $2^{341} \equiv 2 \mod 341$. This makes $341$ a pseudoprime to the Fermat's Compositeness Test, or a \emph{Fermat Pseudoprime}. 
+\\[3mm]
+Although, in this case a change of base $a$ from $2$ to $3$ yields $3^{341} \equiv 168 \not\equiv 3 \mod 341$ which indicates that $341$ is not a prime.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Carmichael Numbers}
+
+Given $n \in \mathbb{Z}$ is a \emph{Carmichael Number}, if $a^{n-1} \equiv 1 \mod n$, $\forall a \in \mathbb{Z}, (a,n) = 1$. 
+\\[3mm]
+The smallest example of \emph{Carmichael Numbers} is $561$, and there exist infinitely many of them.
+\\[3mm]
+\emph{Carmichael Numbers} are \emph{Fermat Pseudoprimes} for each base $a$ comprime to $n$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Eucledian Algorithm for G.C.D.}
+
+For $a, b \in \mathbb{Z}$, we have $(a,0) = a$, $(a,b) = (a,b-a)$ and therefore $(a,b) = (a,b \mod a)$. 
+\\[3mm]
+\begin{algorithm}[H]
+\caption{Euclidean Algorithm}
+\label{alg:EuclideanAlgorithm}
+\begin{algorithmic}
+\Procedure{EuclideanAlgorithm}{$a, b$}
+\State $a \gets \Call{Abs}{a}$
+\State $b \gets \Call{Abs}{b}$ \Comment{Eliminating negative signs}
+\If {$a > b$}
+	\State \Call{Swap}{$a, b$} 
+\EndIf
+\While {$a \neq 0$}
+	\State $c \gets b \mod a$
+	\State $b \gets a$
+	\State $a \gets c$
+\EndWhile
+\State \Return $b$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Time Complexity - $O(\log \min(\abs a,\abs b))$
+\end{frame}
+
+\begin{frame}
+\frametitle{Logarithmic Exponentiation}
+
+\[a^n = \begin{cases} 
+      1 & n = 0 \\
+      (a^{\frac n 2})^2 & n \equiv 0 \mod 2 \\
+      a(a^{\frac {n-1} 2})^2 & n \equiv 1 \mod 2 \\
+   \end{cases}
+\]
+
+\begin{algorithm}[H]
+\caption{Recursive Logarithmic Exponentiation}
+\label{alg:RecursiveLogarithmicExponentiation}
+\begin{algorithmic}
+\Procedure{LogarithmicExponentiation}{$a, n, m$} 
+\State $result \gets 1 \mod m$ \Comment{Calculates $a^n \mod m$}
+\If {$n > 0$ \ \& \ $n \equiv 0 \mod 2$}
+	\State $result \gets \Call{LogarithmicExponentiation}{a, \frac n 2, m}$
+	\State $result \gets result * result \mod m$
+\ElsIf {$n > 0$ \ \& \ $n \equiv 1 \mod 2$}
+	\State $result \gets \Call{LogarithmicExponentiation}{a, \frac {n-1} 2, m}$
+	\State $result \gets result * result \mod m$
+	\State $result \gets result * a \mod m$
+\EndIf
+\State \Return $result$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Logarithmic Exponentiation}
+
+If $n = b_{d-1}b_{d-2}\dots b_{0} = \sum_{i=0}^{d-1}b_i 2^i$, then
+\[a^n = a^{\sum_{i=0}^{d-1}b_i 2^i} = \prod_{i=0}^{d-1} a^{b_i 2^i}\]
+
+\begin{algorithm}[H]
+\caption{Iterative Logarithmic Exponentiation}
+\label{alg:IterativeLogarithmicExponentiation}
+\begin{algorithmic}
+\Procedure{LogarithmicExponentiation}{$a, n, m$}
+\State $result \gets 1 \mod m$ \Comment{Calculates $a^n \mod m$}
+\State $b \gets a$
+\While {$n > 0$}
+\If {$n \mod 2 = 1$} \Comment{If rightmost bit is 1 }
+	\State $result \gets result * b \mod m$ \Comment{Multiply by $b$}
+\EndIf
+\State $b \gets b * b \mod m$ \Comment{$b$ stores $a^{2^i}$ on $i^{th}$ step}
+\State $n \gets \frac n 2$ \Comment{Remove rightmost bit}
+\EndWhile \label{euclidendwhile}
+\State \Return result
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Time Complexity - $O(\log n)$
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's Compositeness Test}
+Using current discussion, \emph{Fermat's Compositeness Test} can be implented as
+\begin{algorithm}[H]
+\caption{Fermat's Compositeness Test}
+\label{alg:FermatCompositenessTest}
+\begin{algorithmic}
+\Procedure{FermatCompositenessTest}{$a, n$}
+\State $gcd \gets \Call{EucledianAlgorithm}{a, n}$.
+\If {$gcd > 1 \ \& \ gcd < n$}
+	\State \Return $false$
+\EndIf
+\State $left \gets \Call{LogarithmicExponentiation}{a,n,n}$
+\State $right \gets a \mod m$
+\State \Return $left \neq right$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's Probabilistic Primality Test}
+
+Every failed run of a compositness test reduces the probability of compositeness, and increases the probability of primality. So we have a \emph{Probabilistic Primality Test},
+
+\begin{algorithm}[H]
+\caption{Fermat's Probabilistic Primality Test}
+\label{alg:FermatProbabilisticPrimalityTest}
+\begin{algorithmic}
+\Procedure{FermatProbabilisticPrimalityTest}{$n, iter$} 
+\While {$iter > 0$} \Comment {$iter$ is number of iterations}
+	\State $a \gets \Call{Random}{0,n-1}$ \Comment {Random number in $[0,n-1]$}
+	\State $check \gets \Call{FermatCompositenessTest}{a,n}$
+	\If {check}
+		\State \Return $false$ \Comment {Composite found}
+	\EndIf
+	\State $iter \gets iter-1$
+\EndWhile
+\State \Return $true$ \Comment {Probable prime found}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Time Complexity - $O(\log n)$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's Primality Test}
+If we have a table of \emph{pseudoprimes} then a simple check removes the flaw from \emph{Fermat's Compositeness Test}.
+\\[3mm]
+D.H. Lehmer prepared a table of all Fermat pseudoprimes below $2.10^8$ for the base $2$ with no factor $< 317$. Thus a primality test to check primality for $n < 2.10^8$ can be formulated.
+\end{frame}
+
+\begin{frame}
+\frametitle{Fermat's Primality Test}
+\begin{algorithm}[H]
+\caption{Fermat's Primality Test}
+\label{alg:FermatPrimalityTest}
+\begin{algorithmic}
+\Procedure{FermatPrimalityTest}{$n$} 
+\If {$n \geq 2.10^8$}
+	\State \Return $false$ \Comment {Fail if out of range}
+\EndIf
+\For {$i = 2$, $i \leq \min(313,n-1)$, $i \gets i+1$}
+	\If {$i \mid n$}
+		\State \Return $false$ \Comment {Factor $\leq 313$}
+	\EndIf
+\EndFor
+\If {$\Call{IterativeLogarithmicExponentiation}{2,p-1,p} \not\equiv 1 \mod 2$}
+	\State \Return $false$ \Comment {Composite by Fermat's Theorem}
+\EndIf
+\State \Return $!\Call{IsLehmerPseudoprime}{n}$ \Comment {Check Lehmer's Table}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Future Work}
+Planned readings include \emph{Lucas Sequences} based \emph{Primality Tests}, \emph{Lenstra's Theorem} and \emph{A.K.S. Algorithm}.
+\\[3mm]
+We plan to implement key algorithms from the above (and elsewhere) as well, in a modern programming language.
+\end{frame}
+\end{document}

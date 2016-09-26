@@ -1,0 +1,323 @@
+\documentclass[11pt]{article}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\title{\textbf{Primes and How to Recognize them}}
+\author{Satwant Rana\\
+		2012 MT 50618\\
+		Advised by, Prof. Amitabha Tripathi}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+Prime numbers are central to Number Theory, acting as the atomic units around which all numbers are built. Therefore it is barely a surprise that \emph{Primality Testing} is a problem with a rich history in Number Theory. 
+
+The motivation behind this project is to rediscover and implement the greatest and the latest in primality testing algorithms.
+
+\section{Primes}
+
+Primes are defined as natural numbers which are only divisible by $1$ and themselves. Formally, given $p \in \mathbb{N}$ is a prime, if whenever $q \mid p$, then $q \in \{1, p\}$.
+
+Any natural greater than $1$ which is not a prime is called a \emph{composite}.
+
+\section{A Naive Primality Test}
+
+The definition of primes presented above can be used to create the simplest primality testing algorithm.\\ Given a natural $n$, whose primality has to determined, we start with $2$ and check for every number upto $n-1$, whether it divides $n$ or not. If we find a divisor in this range, then the above definition tells us that $n$ is not a prime, otherwise it is.
+
+We present the above discussion in pseudocode form in Algorithm~\ref{alg:NaivePrimalityTest}.
+
+\begin{algorithm}
+\caption{Naive Primality Test}
+\label{alg:NaivePrimalityTest}
+\begin{algorithmic}
+\Procedure{NaivePrimalityTest}{$n$}
+\State $d\gets 2$
+\While {$d \leq n-1$}
+\State $r \gets n \mod d$
+\If {$r = 0$} 
+	\State \textbf{return} false \Comment{$n$ is composite}
+\EndIf
+\State $d \gets d+1$
+\EndWhile
+\State \textbf{return} true \Comment{$n$ is prime}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The while loop runs over $O(n)$ values, making the runtime of the algorithm linear in $n$. Inside a computer numbers are stored in base $2$ as sequence of bits, and the size of a number is thus determined by its number of bits which is $O(\log n)$. Therefore the above algorithm is exponential in the size of $n$.
+
+\section{An Optimization}
+The definition of division in $\mathbb{Z}$ dictates that for $a, n \in \mathbb{Z}$, if $a \mid n$, then there exists $b \in \mathbb{Z}$ such that $n = ab$. Thus, if $a \geq \sqrt n$, then $b \leq \sqrt n$. 
+
+ This reveals that a check for divisors of $n$ upto $\sqrt n$ is sufficient as other divisors would be paired up with one of these divisors. We can optimize the first algorithm we presented to $O(\sqrt n)$ with this optimization, as seen in Algorithm~\ref{alg:OptimizedNaivePrimalityTest}.
+ 
+\begin{algorithm}
+\caption{Optimized Naive Primality Test}
+\label{alg:OptimizedNaivePrimalityTest}
+\begin{algorithmic}
+\Procedure{OptimizedNaivePrimalityTest}{$n$}
+\State $d\gets 2$
+\While {$d \leq \min(n-1,\sqrt n))$}
+\State $r\gets n \mod d$
+\If {$r = 0$} 
+	\State \textbf{return} false \Comment{$n$ is composite}
+\EndIf
+\State $d \gets d+1$
+\EndWhile
+\State \textbf{return} true \Comment{$n$ is prime}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Compositeness Tests}
+So far we have seen tests which check whether a given number is prime or not. But there exists tests which run much faster than the primality tests discussed above, but on some rare occasions indicate composites as primes. These composite numbers which the compositeness test labels as primes are called the \emph{pseudoprimes} for the test.
+
+More formally, a successful \emph{primality test} proves that a given number is prime, whereas a successful \emph{compositeness test} proves that a given number is composite. 
+
+If a compositeness test is not successful, then we can't comment on the primality of the given number. So how do we use a compositeness test to test primality? We will see in coming sections.
+
+Before we proceed to present some compositeness tests, we need some number theoretic background.
+
+\section{Fermat's (Little) Theorem}
+
+An important and beautiful result in Number Theory, commonly referred to as \emph{Fermat's Little Theorem}, is as presented as Theorem~\ref{theorem:FermatLittleTheorem}.
+
+\begin{theorem}[Fermat's Theorem]
+\label{theorem:FermatLittleTheorem}
+Given prime $p$, and $a \in \mathbb{Z}$, $(a,p) = 1$ we have,
+\[ a^{p-1} \equiv 1 \mod p \]
+\end{theorem}
+
+\begin{proof}
+If $p \mid a$, then $a^p \equiv a \equiv 0 \mod p$, and we are done. Otherwise if $(a,p) = 1$, then list all the first $p-1$ multiples of $a$,
+\[ a, 2a, 3a, \dots (p-1)a\]
+
+All of these numbers are unique $\mod p$, for if $ia \equiv ja \mod p$ then since $(a,p) = 1$, we can cancel $a$ from both sides giving $i \equiv j \mod p$. So, the above numbers represent the following sequence in some order,
+\[ 1, 2, 3, \dots (p-1)\]
+
+We can equate the products of the sequences to get, 
+\[(p-1)!\ a^{p -1}\equiv (p-1)! \mod p\]
+
+Again since $((p-1)!,p) = 1$, we can cancel $(p-1)!$ to get
+\[a^{p-1} \equiv 1 \mod p\]
+
+which completes the proof.
+\end{proof}
+
+\begin{corollary}
+\label{corollary:BetterFermatLittleTheorem}
+Given prime $p$, and $a \in \mathbb{Z}$ we have,
+\[ a^p \equiv a \mod p \]
+\end{corollary}
+ 
+\begin{proof}
+If $(a,p) = 1$, then we have $a^{p-1} \equiv 1 \mod p$ by Theorem~\ref{theorem:FermatLittleTheorem}. We can multiply on both sides by $a$ to get $a^p \equiv a \mod p$.
+
+If $p \mid a$, then $a^p \equiv 0 \equiv a \mod p$. 
+\end{proof}
+
+\begin{corollary}
+\label{corollary:FermatLittleTheoremConverse}
+If $n \in \mathbb{N}$, $n \geq 2$ and $\exists a \in \mathbb{Z}$ such that,
+\[a^n \not\equiv a \mod n\]
+then $n$ is not a prime.  
+\end{corollary}
+Corollary~\ref{corollary:FermatLittleTheoremConverse} states the converse of Corollary~\ref{corollary:BetterFermatLittleTheorem}.
+
+\section{Fermat's Theorem as a Compositeness Test}
+
+The Corollary~\ref{corollary:FermatLittleTheoremConverse} is a simple compositeness test using \emph{Fermat's Theorem}. For instance, for $n = 9$, $2^9 \equiv 8 \not\equiv 2 \mod 9$, indicating the compositeness of $9$.
+
+However, there do exist combinations of $a$ and composite $n$ which satisfy the \emph{Fermat's Theorem}. For instance $n = 341 = 11.31$ gives $2^{341} \equiv 2 \mod 341$. This makes $341$ a pseudoprime to the Fermat's Compositeness Test, or a \emph{Fermat Pseudoprime}. Although, in this case a change of base $a$ from $2$ to $3$ yields $3^{341} \equiv 168 \not\equiv 3 \mod 341$ which indicates that $341$ is not a prime.
+
+We arrive at this fallacy because the condition in Corollary~\ref{corollary:FermatLittleTheoremConverse} is only a sufficient condition for $n$ to be a composite, but not a necessary one. And that is what makes it a compositeness test and not a primality test.
+
+As a matter of fact, there do exist composites $n$ which satisfy Corollary~\ref{corollary:FermatLittleTheoremConverse} for all $a$ coprime to $n$, and are called \emph{Carmichael Numbers}. Formally defined, $n$ is a Carmichael Number if $a^{n-1} \equiv 1 \mod n$, $\forall a \in \mathbb{Z}, (a,n) = 1$. The smallest example of Carmichael Numbers is $561$, and there exist infinitely many of them. 
+
+If we add an additional check of whether $(a,n) \neq 1$ in the beginning of the test, we can correctly label Carmichael Numbers as composites given a suitable base $a$ (which is not coprime to $n$).
+
+Let's have some algorithmic buildup before we can present the pseudocode of Fermat's Compositeness Test.
+
+\section{Eucledian Algorithm for G.C.D.}
+
+In this section we present the well-known euclidean algorithm to calculate the greatest common divisor of two (non-negative) integers. Since gcd is defined to be positive, the negative sign can be eliminated by taking absolute values at beginning.
+
+We trivially have $(a,0) = a$, $(a,b) = (a,b-a)$ and therefore $(a,b) = (a,b \mod a)$. 
+
+This set of identities can be leveraged to formulate a systematic way to calculate $(a,b)$, $\forall a, b \in \mathbb{Z}$. If we $b \geq a$, then it can be replaced by $b \mod a$ without affecting the gcd value. Since $b \mod a < a$, we have that the sequence of the minimum of the two numbers is a strictly decreasing one. This assures that the minimum value will finally become $0$, and the algorithm will terminate.
+
+Let's look at the pseudocode in Algorithm~\ref{alg:EuclideanAlgorithm}.
+
+\begin{algorithm}
+\caption{Euclidean Algorithm}
+\label{alg:EuclideanAlgorithm}
+\begin{algorithmic}
+\Procedure{EuclideanAlgorithm}{$a, b$}
+\State $a \gets \Call{Abs}{a}$
+\State $b \gets \Call{Abs}{b}$ \Comment{Eliminating negative signs}
+\If {$a > b$}
+	\State \Call{Swap}{$a, b$} 
+\EndIf
+\While {$a \neq 0$}
+	\State $c \gets b \mod a$
+	\State $b \gets a$
+	\State $a \gets c$
+\EndWhile
+\State \Return $b$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Let's define $a_n, b_n$ to be two numbers at the $i^{th}$ iteration, such that $0 \leq a_n \leq b_n$. We have $a_{n+1} = b_n \mod a_n$, $b_{n+1} = a_n$ and $a_{n+2} = a_n \mod (b_n \mod a_n)$, $b_{n+2} = b_n \mod a_n$. Thus either $a_{n+1} \leq \frac {a_n} 2$, or $a_{n+2} = a_n - a_{n+1} \leq \frac {a_n} 2$. 
+
+Therefore, the minimum of the two numbers gets halved in atmost two steps, making the algorithm take $O(\log \min(\abs a,\abs b))$ remainder calculation steps.
+
+\section{Logarithmic Exponentiation}
+
+An essential part of the Fermat's Compositeness Test is to be able to calculate the value $a^n$. We can calculate it by repeatedly multiplying $a$ to a running product $n$ times and calculating the remainder modulo $n$. This is an $O(n)$ algorithm to calculate $a^n$, thus making Fermat's Composteness Test $\Omega(n)$ in time - not an improvement over primality tests discussed so far.
+
+Fortunately, there's structure to the problem in the form of the following recursion
+\[a^n = \begin{cases} 
+      1 & n = 0 \\
+      (a^{\frac n 2})^2 & n \equiv 0 \mod 2 \\
+      a(a^{\frac {n-1} 2})^2 & n \equiv 1 \mod 2 \\
+   \end{cases}
+\]
+
+The above can be rewritten in the form of Algorithm~\ref{alg:RecursiveLogarithmicExponentiation}.
+
+\begin{algorithm}
+\caption{Recursive Logarithmic Exponentiation}
+\label{alg:RecursiveLogarithmicExponentiation}
+\begin{algorithmic}
+\Procedure{RecursiveLogarithmicExponentiation}{$a, n, m$} 
+\State $result \gets 1 \mod m$ \Comment{Calculates $a^n \mod m$}
+\If {$n > 0$ \ \& \ $n \equiv 0 \mod 2$}
+	\State $result \gets \Call{RecursiveLogarithmicExponentiation}{a, \frac n 2, m}$
+	\State $result \gets result * result \mod m$ \Comment{Watch for overflow here}
+\ElsIf {$n > 0$ \ \& \ $n \equiv 1 \mod 2$}
+	\State $result \gets \Call{RecursiveLogarithmicExponentiation}{a, \frac {n-1} 2, m}$
+	\State $result \gets result * result \mod m$
+	\State $result \gets result * a \mod m$
+\EndIf
+\State \Return $result$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+At every step of recursion, the value of $n$ gets halved thus the algorithm takes $O(\log n)$ multiplication steps.
+
+We can improve on Algorithm~\ref{alg:RecursiveLogarithmicExponentiation}, by eliminating the recursion. Computers store numbers in binary. Suppose $n = b_{d-1}b_{d-2}\dots b_{0} = \sum_{i=0}^{d-1}b_i 2^i$, where $d$ is the number of bits of $n$ and $b_i$ is the $i^{th}$ bit from right. So $a^n$ can be calculated as
+\[a^n = a^{\sum_{i=0}^{d-1}b_i 2^i} = \prod_{i=0}^{d-1} a^{b_i 2^i}\]
+
+The above equation can be represented as Algorithm~\ref{alg:IterativeLogarithmicExponentiation}.
+
+\begin{algorithm}
+\caption{Iterative Logarithmic Exponentiation}
+\label{alg:IterativeLogarithmicExponentiation}
+\begin{algorithmic}
+\Procedure{IterativeLogarithmicExponentiation}{$a, n, m$}
+\State $result \gets 1 \mod m$ \Comment{Calculates $a^n \mod m$}
+\State $b \gets a$
+\While {$n > 0$}
+\If {$n \mod 2 = 1$} \Comment{If rightmost bit is 1 }
+	\State $result \gets result * b \mod m$ \Comment{Multiply by $b$}
+\EndIf
+\State $b \gets b * b \mod m$ \Comment{$b$ stores $a^{2^i}$ on $i^{th}$ step}
+\State $n \gets \frac n 2$ \Comment{Remove rightmost bit}
+\EndWhile \label{euclidendwhile}
+\State \Return result
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Thus we can write Fermat's Compositeness Test as Algorithm~\ref{alg:FermatCompositenessTest}.
+
+\begin{algorithm}
+\caption{Fermat's Compositeness Test}
+\label{alg:FermatCompositenessTest}
+\begin{algorithmic}
+\Procedure{FermatCompositenessTest}{$a, n$}
+\State $gcd \gets \Call{EucledianAlgorithm}{a, n}$.
+\If {$gcd > 1 \ \& \ gcd < n$}
+	\State \Return $false$
+\EndIf
+\State $left \gets \Call{IterativeLogarithmicExponentiation}{a,n,n}$
+\State $right \gets a \mod m$
+\State \Return $left \neq right$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+It's easy to see that the algorithm takes $O(\log n)$ time.
+
+\section{Fermat's Theorem as a Probabilistic Primality Test}
+
+Once we have a compositeness test, we can run a it for a fixed number of times on the same number (with changing parameters). If we don't get indication of compositeness even a single time, then the probability of the given number being a composite is too low, and we have a \emph{Probabilistic Primality Test}. A probabilistic primality test thus indicates whether a number is composite or a \emph{probable prime}, i.e. a number which is prime with some (high) probability.
+
+This technique can be applied to Fermat's Compositeness Test, by changing the base $a$ on successive iterations, as seen in Algorithm~\ref{alg:FermatProbabilisticPrimalityTest}.
+
+\begin{algorithm}
+\caption{Fermat's Probabilistic Primality Test}
+\label{alg:FermatProbabilisticPrimalityTest}
+\begin{algorithmic}
+\Procedure{FermatProbabilisticPrimalityTest}{$n, iter$} 
+\While {$iter > 0$} \Comment {$iter$ is number of iterations}
+	\State $a \gets \Call{Random}{0,n-1}$ \Comment {Random number in the range $[0,n-1]$}
+	\State $check \gets \Call{FermatCompositenessTest}{a,n}$
+	\If {check}
+		\State \Return $false$ \Comment {Composite found}
+	\EndIf
+	\State $iter \gets iter-1$
+\EndWhile
+\State \Return $true$ \Comment {Probable prime found}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+A small value of $iter = 20$ works well in practice, and thus we have an $O(\log n)$ algorithm.
+
+\section{Fermat's theorem as a Primality Test}
+When trying to convert a compositeness test into a primality test, the first obvious solution that comes to mind is to (somehow) maintain a table of all possible pseudoprimes within the range we wish to work on. Before running the actual test, one can lookup the table to see if the input number is a pseudoprime for the test, and label it as a composite right at the beginning of the test.
+
+The pseudoprimes for Fermat's Test also depend upon the base $a$ other than input $n$. D.H. Lehmer prepared a table of all Fermat pseudoprimes below $2.10^8$ for the base $2$ with no factor $< 317$. Thus a primality test to check primality for $n < 2.10^8$ can be formulated as Algorithm~\ref{alg:FermatPrimalityTest}.
+
+\begin{algorithm}
+\caption{Fermat's Primality Test}
+\label{alg:FermatPrimalityTest}
+\begin{algorithmic}
+\Procedure{FermatPrimalityTest}{$n$} 
+\If {$n \geq 2.10^8$}
+	\State \Return $false$ \Comment {Fail if out of range}
+\EndIf
+\For {$i = 2$, $i \leq \min(313,n-1)$, $i \gets i+1$}
+	\If {$i \mid n$}
+		\State \Return $false$ \Comment {Factor $\leq 313$}
+	\EndIf
+\EndFor
+\If {$\Call{IterativeLogarithmicExponentiation}{2,p-1,p} \not\equiv 1 \mod 2$}
+	\State \Return $false$ \Comment {Composite by Fermat's Theorem}
+\EndIf
+\State \Return $!\Call{IsLehmerPseudoprime}{n}$ \Comment {Check Lehmer's Table}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
+
+
