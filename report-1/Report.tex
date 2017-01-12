@@ -7,6 +7,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{amsthm}
 \usepackage{mathtools}
+\usepackage{mathrsfs}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
@@ -318,6 +319,291 @@ The pseudoprimes for Fermat's Test also depend upon the base $a$ other than inpu
 \end{algorithmic}
 \end{algorithm}
 
+\section{A Generalisation of Fermat's Little Theorem}
+Fermat's Little Theorem is only a necessary condition for a number to be prime, and therefore we can only formulate compositeness tests with it.
+
+What if there were a necessary and sufficient version of it? Then we could use the sufficiency condition to formulate a primality test.
+
+We present one such generalisation of Fermat's Little Theorem.
+
+\begin{theorem}
+\label{theorem:GeneralisedFermatLittleTheorem}
+Given $n \in \mathbb{N}$, $n \geq 2$ and $a \in \mathbb{Z}$, $(a,n) = 1$, then $n$ is prime if and only if
+\[ (X+a)^n \equiv X^n + a \mod n \]
+\end{theorem}
+
+\begin{proof}
+For $0 < i < n$, the coefficient of $x^i$ in the polynomial $(X+a)^n - (X^n + a)$ is ${n \choose i} a^{n-i}$, and for $i = 0$, it's $a^n - a$.
+
+If $n$ is a prime, then ${n \choose i} \equiv 0 \equiv a^n - a \mod n$, so the polynomial is identically $0 \mod n$.
+
+If $n$ is a composite with a prime factor p such that $p^q || n$, then $p^q \not | {n \choose p}$ and is comprime to $a^{n-q}$.
+% ellaborate the part above
+And so the coefficient of $X^p$ is not $0 \mod n$, making the above polynomial not identically $0 \mod n$.
+\end{proof}
+This gives us a simple primality test for input $n$. We chose an appropriate $a$, and evaluate the terms of the polynomial $(X+a)^n -(X^n + a) \mod n$. We have $O(n)$ terms and so the primality test is atleast $\Omega(n)$. Can we do better? Specifically, can we find a polynomial time algorithm?
+
+\section {Building up to a Polynomial Time Primality Test}
+It's clear that we need to reduce the number of terms in the aforementioned polynomial. One simple way to reduce terms is to consider the polynomial modulo $X^r - 1$ for some small $r$. That is we make use of the identity,
+\[(X+a)^n \equiv X^n + a \mod (n, X^r - 1)\] 
+The above equation stands for $(X+a)^n - (X^n + a) = nP(X) + (X^r - 1)Q(X)$ for some polynomials $P$ and $Q$.
+
+From Theorem~\ref{theorem:GeneralisedFermatLittleTheorem} we know that the above equation is satisfied by all primes $n$. But we can have composite $n$ and some choice of $a$ and $r$, for which the above equation true. 
+
+Agarwal, Kayal and Saxena proved that if for several choices of $a$ and for some fixed $r$ the above equation is satisfied, then $n$ is power of a prime. We present their work in the following sections about the \emph{AKS Primality Test}. Further the value of $r$ and number of choices for $a$ are both polynomial in $\log n$.
+
+\section {The AKS Primality Test}
+Without much further ado, we present to you the \emph{AKS Primality test} as Algorithm~\ref{alg:AKSPrimalityTest}.
+
+\begin{algorithm}
+\caption{AKS Primality Test}
+\label{alg:AKSPrimalityTest}
+\begin{algorithmic}
+\Procedure{AKSPrimalityTest}{$n$} 
+
+\If {$n < 2$ or $n = a^b$ for $a, b \in \mathbb{N}$ and $b \geq 2$}
+	\State \Return $false$  \Comment {Step 1}
+\EndIf
+
+\State $r \gets min \{i: i \in \mathbb{N},\ i \leq \max(3,\ \lceil \log^5 n \rceil),\ o_i(n) > \log^2 n \}$ \Comment {Step 2}
+
+\For {$a = 2$, $i \leq r$, $a \gets a+1$}
+	\If {$1 < (a,n) < n$}
+		\State \Return $false$  \Comment {Step 3}
+	\EndIf
+\EndFor
+
+\If {$n \leq r$}
+	\Return $true$  \Comment {Step 4}
+\EndIf
+
+\For {$a = 1$, $a \leq \lfloor \sqrt{\phi(r)} \log n \rfloor$, $a \gets a+1$}
+	\If {$(X+a)^n \not \equiv X^n + a \mod (n, X^r - 1)$}
+		\State \Return $false$  \Comment {Step 5}
+	\EndIf
+\EndFor
+\State \Return $true$ \Comment {Step 6}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+In the coming sections we string a series of lemmas to formulate the proof for AKS.
+
+\begin{lemma}
+\label{lemma:AKSLemma1}
+If $n$ is a prime then Algorithm~\ref{algorithm:AKSPrimalityTest} returns $true$.
+\end{lemma}
+ 
+\begin{proof}
+If $n$ is a prime, then Steps $1$ and $3$ can never return $false$. Also by discussion in previous section, Step $5$ can't return $false$. So the algorithm returns $true$ in either Step $4$ or Step $5$.
+\end{proof}
+
+\subsection{Is $n$ a perfect power?}
+The check for Step $1$ can be done in $O(\log^3 n)$ time. We need to find whether there exist $a, b \in \mathbb{N}, b \geq 2$ such that $n = a^b$. The idea is as follows. We iterate over all $1 \leq b \leq \log n$ and binary search for the root $a$ of the equation $n = a^b$. 
+
+We present the details in Algorithm~\ref{alg:PerfectPowerTest}. It involves $\log n$ iterations for $b$, $\log n$ iterations for binary search, and $\log n$ arithmetic operations for logarithmic exponentiation. So, overall it takes $O(\log^3 n)$ arithmetic operations to check if $n$ is a perfect power. Numbers can get as large as $n$, so it takes $O(\log n)$ time for arithmetic operations, and $O(\log^4 n)$ time overall.
+
+\begin{algorithm}
+\caption{Perfect Power Test}
+\label{alg:PerfectPowerTest}
+\begin{algorithmic}
+\Procedure{PerfectPowerTest}{$n$}
+\If {$n = 1$}
+	\State \Return $true$
+\EndIf
+\For {$b \gets 2$, $b \leq \log n, b \gets b+1$}
+	\State $l \gets 1, u \gets n$
+	\While {$l < u$}
+		\State $m \gets \lfloor \frac{l+u}{2} \rfloor$
+		\State $x \gets m^b$ \Comment{Use Logarithmic Exponentiation here}
+		\If {$x = n$}
+			\ \Return $true$
+		\ElsIf {$x < n$}
+			\ $l \gets m+1$
+		\Else
+			\ $r \gets m-1$
+		\EndIf
+	\EndWhile
+\EndFor
+\State \Return $false$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection {Existence of a small $r$}
+In this section, we prove that there exists an $r$ as required in Step $2$.
+
+\begin{lemma}
+\label{lemma:LCMLemma}
+Let $LCM(m)$ be $lcm$ of first $m$ numbers. We have for $m \geq 7$,
+\[LCM(m) \geq 2^m\]
+\end{lemma}
+\begin{proof}
+To Be Added
+\end{proof}
+
+\begin{lemma}
+\label{lemma:AKSLemma2}
+There exists an $r \leq \max(3, \lceil \log^5 n \rceil)$ and $o_r(n) > \log^2 n$.
+\end{lemma}
+\begin{proof}
+If $n = 2$, then $r = 3$ works. Assume $n \geq 3$. Let $B = \lceil \log^5 n \rceil$. Since $n \geq 3$, we have $B > 10$. 
+
+Consider the smallest $r \in \mathbb{N}$ which doesn't divide the product $P$ defined as,
+\[P = n^{\log B}\ .\ \prod_{i=1}^{\lfloor \log^2 n \rfloor}{n^i-1} \]
+
+We have,
+\[n^{\log B}\ .\ \prod_{i=1}^{\lfloor \log^2 n \rfloor}{n^i-1} < n^{\log B + \sum_{i=1}^{\log^2 n}i} \leq n^{\log^4 n} \leq 2^{\log^5 n} \leq LCM(B)\]
+Second inequality holds for $n \geq 2$ and last inequality follows by Lemma~\ref{lemma:LCMLemma}. If $r > B$, then it can't be the smallest natural not dividing $P$ as $P < LCM(B)$. Hence, $r \leq B$.
+
+Now, let $p$ be a prime factor of $r$, such that $p^q || r$. So that $q \leq \log r \leq \log B$. If $p | n$, then $p^q | n^{\log B}$. Since $r \not | P$, there exists one prime $p | r$ such that $p \not | n$. As $p \ |  \frac{r}{(n,r)}$ and therefore, $\frac{r}{(n,r)} \not | P$. Since $r$ is the smallest natural not dividing $P$, so $r \leq \frac{r}{(n,r)}$. Therefore $(n,r) = 1$. 
+
+Now we can define $o_r(n)$. Since $n^i \not \equiv 1 \mod r \ \forall \ r \leq \lfloor \log^2 n \rfloor$, we have $o_r(n) > \log^2 n$.
+\end{proof}
+
+\subsection{Some definitions}
+We have shown that Algorithm~\ref{algo:AKSPrimalityTest} returns $true$ if input $n$ is a prime. What remains to be shown is that it returns $false$ if $n$ is composite.
+
+Since $n > 2$, $o_r(n) > 1$. So there exists a prime divisor $p$ of $n$ such that $o_r(p) > 1$. Since $(n,r) = 1$, we have $(p,r) = 1$. Also, $p > r$ else Step $3$ or $4$ would identify that. For the rest of the discussion we would keep $p$ and $r$ fixed. Also let $l = \lfloor \sqrt{\phi(r)} \log n \rfloor$.
+
+Now what remains to be shown is that if any of the equations in Step $5$ is $true$, then $n$ is not a prime. If $n$ satisfies all the $l$ conditions of Step $5$ then,
+\[(X+a)^n \equiv X^n + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \ \ \ \ \dagger\]
+
+Or in other words $(X+a)^n = X^n + a$ in the ring $\mathbb{Z}_n[X]/(X^r-1)$ for all $0 \leq a \leq l$. Note that $X$ acts as a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$.
+
+From Theorem~\ref{theorem:GeneralisedFermatLittleTheorem},
+\[(X+a)^p \equiv X^p + a \mod (n,X^r-1)\]
+From $\dagger$ we have, 
+\[((X+a)^p)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \]
+By combining the last two equations we get,
+\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \]
+
+Since $X$ is a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$ and $(p,r) = 1$, $X^p$ is also a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$. And therefore,
+\[(X+a)^{\frac{n}{p}} \equiv X^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq 
+l \]
+
+So we have that both $p$ and $\frac{n}{p}$ satisfy $\dagger$. The \emph{AKS} algorithm gives a name to this property,
+
+\begin{lemma}
+\label{lemma:introspective}
+For polynomial $f(X)$ and $m \in \mathbb{N}$, if $m$ satisfies
+\[f(X)^m \equiv f(X^m) \mod (n,X^r-1)\]
+then $m$ is said to be introspective for $f(X)$.
+\end{lemma}
+
+\begin{lemma}
+\label{lemma:IntrospectiveLemma1}
+If $m$ and $m'$ are both introspective for a polynomial $f(X)$, then so is $m . m'$.
+\end{lemma}
+\begin{proof}
+Since $m$ is introspective for $f(X)$, we have
+\[f(X)^m \equiv f(X^m) \mod (n, X^r-1)\]
+Substituting $X^{m'}$ for $X$ in the above equation, we have
+\[f(X^{m'})^m \equiv f((X^{m'})^m) \mod (n, (X^{m'})^r-1)\]
+Also since $m'$ is introspective for $f(X)$, we have
+\[f(X)^{m'} \equiv f(X^{m'}) \mod (n, X^r-1)\]
+Combining the two equations, we get
+\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (n, X^{m'r}-1)\]
+Since $X^{r}-1 | X^{m'r}-1$,
+\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (n, X^r-1)\]
+\end{proof}
+\begin{lemma}
+\label{lemma:IntrospectiveLemma1}
+If $m$ is introspective for both the polynomials $f(X)$ and $g(X)$, then it is also introspective for $f(X) . g(X)$.
+\end{lemma}
+\begin{proof}
+We have,
+\[f(X)^m \equiv f(X^m) \mod (n, X^r-1)\]
+\[g(X)^m \equiv g(X^m) \mod (n, X^r-1)\]
+Multiplying together,
+\[f(X)^mg(X)^m \equiv f(X^m)g(X^m) \mod (n, X^r-1)\]
+which is nothing but,
+\[(f(X)g(X))^m \equiv f(X^m)g(X^m) \mod (n, X^r-1)\]
+\end{proof}
+
+\subsection{About two groups}
+The previous two lemmas put together imply that the every number in the set $I = \{\frac{n}{p}^i.p^j\ |\ i,j \in \mathbb{N}_0\}$ for every polynomial in the set $P = \{\prod_{a=0}^{l}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$. These two sets help define two groups which play a vital role in the analysis of \emph{AKS}.
+
+The first group is the set of residues of all elements of $I$ modulo $r$. Let's denote this set as $G$, and it is a subset of $\mathbb{Z}_r^*$ as $(n,r) = (p,r) = 1$. Let $t = |G|$. Since $n^i \in G \ \forall \ i \in \mathbb{N}_0$ and $o_r(n) > \log^2(n)$, we have $t > \log^2(n)$.
+
+Now over to the definition of the second group. Let $Q_r(X)$ be $r^{th}$ cyclotomic polynomial over $F_p$. $Q_r(X)$ factors $X^r-1$ into irreducible factors of degree $o_r(p)$. Let $h(X)$ be one such irreducible factor. Since $o_r(p) > 1$, degree of $h(X)$ is greater than one. The second group is the set of all residues of polynomials in $P$ modulo $h(X)$ and $p$. Let $\mathcal{G}$ be this group. This group is generated by elements $X, X + 1, X + 2, \dots, X + l$ in the field $F = F_p[X]/(h(X))$ and is a subgroup of the multiplicative group of $F$.
+
+\subsection{Estimating the size of $\mathcal{G}$}
+\begin{lemma}
+[Lenstra]\label{lemma:GLowerBound}
+$|\mathcal{G}| \geq {{t+l} \choose {t-1}}$
+\end{lemma}
+\begin{proof}
+We begin by reminding that since $h(X)$ is a factor of $Q_r(X)$, $X$ is a primitive $r^{th}$ root of unity.
+
+We show that any two distinct polynomials $f(X), g(X) \in P$ with degree less than $t$, map to different elements in $\mathcal{G}$. Let's assume to the contrary that $f(X) = g(X)$ in $F$. Let $m \in I$. We also have $f(X)^m = g(X)^m$ in $F$. Since $m$ is introspective for $f(X)$ and $g(X)$, and $h(X)$ divides $X^r-1$, we have $f(X^m) = g(X^m)$ in $F$. So, $X^m$ is a root of the the polynomial $Q(Y) = f(Y) - g(Y)$ in $F$, for every $m \in G$ (as $h(X)$ divides $X^r-1$). Now $G \subset \mathbb{Z}_r^*$, so $(m,r) = 1$, and hence $X^m$ is a distinct primitive $r^{th}$ root of unity for every $m \in G$. This means that $Q(Y)$ has atleast $t = |G|$ roots in $F$. However the degree of $Q(Y)$ is less than $t$ because of the choice of $f(X)$ and $g(X)$. Hence, $f(X) \neq g(X)$ in $F$.
+
+Now, if $0 \leq i \neq j \leq l$ then $i \neq j$ in $F_p$ as $l = \lfloor \sqrt{\phi(r)} \log n\rfloor < \phi(r) < r < p$. The first inequality is true becuase $\log^2{n} < o_r(n) < \phi(r)$. So $X, X+1, X+2, \dots, X+l$ are all distinct in $F = F_p[X]/(h(X))$. Also since degree of $h(X)$ is greater than $1$, $X+a \neq 0\ \forall \ 0 \leq a \leq l$. Therefore, there are atleast $l+1$ distibct polynomials of degree $1$ in $\mathcal{G}$.
+
+We can now estimate the number of polynomials of degree less than $t$ in $F$. The set $P_t = \{\prod_{a=0}^{l}(X+a)^{e_a}\ | \ \sum_{a=0}^{l}e_a \leq t-1\}$ is a subset of the set of polynomials with degree $<t$, and $|P_t| = {{l+t}\choose{t-1}}$. As discussed above all these polynomials are distinct in $\mathcal{G}$, and therefore $|\mathcal{G}| \geq {{t+l} \choose {t-1}}$.
+\end{proof}
+
+\begin{lemma}
+\label{lemma:GUpperBound}
+If $n$ is not a power of $p$, then $|\mathcal{G}| \leq n^{\sqrt{t}}$
+\end{lemma}
+\begin{proof}
+Consider the subset of $I$, $I' = \{p^i.(\frac{n}{p})^j\ |\ 0 \leq i, j \leq \lfloor \sqrt{t} \rfloor \}$.
+Since $n$ is not a power of $p$, $I'$ has $(\lfloor \sqrt{t} \rfloor + 1)^2 > t$ numbers. Since $|G| = t$, two of the members of $I'$ must be equal modulo $r$. Let $m_1, m_2$ with $m_1 > m_2$ be the numbers. 
+
+So we have, $X^{m_1} \equiv X^{m_2} \mod (n, X^r-1)$. Using this and the fact that $m_1, m_2$ are intospective for any $f(X) \in P$, we have 
+\[f(X)^{m_1} \equiv f(X^{m_1} \equiv f(X^{m_2}) \equiv f(X)^{m_2} \mod (n, X^r-1)\]
+Therefore, $f(X)^{m_1} = f(X)^{m_2}$ in $F$ for all $f(X) \in P$. 
+
+Consider the polynomial $Q'(Y) = Y^{m_1} - Y^{m_2}$ over the field $F$. Since every member of $\mathcal{G}$ is a root of $Q'(Y)$, we have that $Q'(Y)$ has atleast $|\mathcal{G}|$ roots in $F$. The degree of $Q'(Y)$ is $m_1$, so $|\mathcal{G}| \leq m_1$.
+
+By the definition of $I'$, $m_1 \leq (p.\frac{n}{p})^{\sqrt{t}} = n^{\sqrt{t}}$. Therefore, $|\mathcal{G}| \leq n^{\sqrt{t}}$.
+
+\end{proof}
+
+\subsection{Completing the proof}
+\begin{lemma}
+\label{lemma:CombinationsLemma}
+\[{2n+1 \choose n} \geq 2^{n+1}\]
+\end{lemma}
+\begin{proof}
+\[{2n+1 \choose n} = \frac{\prod_{i=1}^{n}(n+1+i)}{\prod_{i=1}^{n}{i}} = \prod_{i=1}^{n}\frac{n+1+i}{i}\]
+\[ = \prod_{i=2}^{n}\frac{n+1+i}{i}\ .\ (n+2) \geq \prod_{i=2}^{n}2\ .\ (n+2) = 2^{n-1}(n+2)\]
+
+Since $n \geq 2$,
+\[{2n+1 \choose n} \geq 2^{n-1}(n+2) \geq 2^{n-1}.(4) = 2^{n+1}\]
+\[\]
+\end{proof}
+
+\begin{theorem}
+If Algorithm~\ref{algo:AKSPrimalityTest} returns $true$ then input $n$ is prime.
+\end{theorem}
+\begin{proof}
+Here, we handle the case of $true$ being returned at Step $6$. We make use the last two lemmas,
+\[|\mathcal{G}| \geq {{t+l} \choose {t-1}}\]
+
+Since $t > \log^2 n$, and therefore $t > \sqrt t \log n$. Combining with the fact that ${{t+l} \choose {t-1}} = \frac{\prod_{i=0}^l{(t+i)}}{(l+1)!}$ is an increasing function in $t$,
+\[|\mathcal{G}| \geq {{{\lfloor \sqrt t \log n \rfloor} + 1 + l} \choose {\lfloor \sqrt t \log n \rfloor}}\]
+
+Also $l = \lfloor \sqrt{\phi(r)} \log n \rfloor$, and $G \subset \mathbb{Z}_r^{*}$. So $t = |G| \leq |\mathbb{Z}_r^{*}| = \phi(r)$. Therefore, $l \geq \lfloor \sqrt{t} \log{n} \rfloor$, and hence,
+\[|\mathcal{G}| \geq {{2{\lfloor \sqrt t \log n \rfloor}+1} \choose {\lfloor \sqrt t \log n \rfloor}}\]
+
+Using Lemma~\ref{lemma:CombinationsLemma},
+\[|\mathcal{G}| \geq 2^{{\lfloor \sqrt t \log n \rfloor}+1} > 2^{\sqrt t \log n} = n^{\sqrt t}\]
+
+But we know that $|\mathcal{G}| \leq n^{\sqrt t}$ unless $n$ is power of a prime. So $n = p^{q}$ for some power $q$. But if that were the case we would have identified it in Step $1$ of the algorithm. Hence, $n$ is a prime.
+
+\end{proof}
+\subsection{Time Complexity analysis}
+As discussed before, Step $1$ can be done in $O(\log^4 n)$ time.
+
+Step $2$ involves calculating if order is greater than $\log^2 n$ for $\log^5 n$ numbers. This can be checked by calculating $n^i$ succesively for $1 \leq i \leq \lceil \log^5 n \rceil$. The numbers can get as large as $\log^5 n$. So it takes \\$O({\log^5 n}\ .\ {\log^2 n}\ .\ {\log{\log^5 n}}) = O(\log^8 n)$ time for this step.
+
+Step $3$ is gcd calcuation for numbers as large as $n$, so it can be done in $O(\log^2 n)$ time.
+
+What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log n \rfloor = O(\log^{3.5}n)$ iterations. Each iterations involve exponentiation of polynomials. Each exponentiation takes $O(\log n)$ iterations. There are $O(r)$ terms in each polynomial, and coefficients are as large as $n$. So it takes \\$O({log^{3.5}n}\ .\ {\log n}\ .\ {r}\ .\ {\log n})= O(\log^{10.5}n)$. This step dominates the time complexity, and hence the time complexity of overall algorithm is $O(\log^{10.5}n)$
 \end{document}
 
 
