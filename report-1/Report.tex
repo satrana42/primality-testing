@@ -12,6 +12,7 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definition}[section]
 \makeatletter
 \def\BState{\State\hskip-\ALG@thistlm}
 \makeatother
@@ -333,7 +334,7 @@ Given $n \in \mathbb{N}$, $n \geq 2$ and $a \in \mathbb{Z}$, $(a,n) = 1$, then $
 \end{theorem}
 
 \begin{proof}
-For $0 < i < n$, the coefficient of $x^i$ in the polynomial $(X+a)^n - (X^n + a)$ is ${n \choose i} a^{n-i}$, and for $i = 0$, it's $a^n - a$.
+For $0 < i < n$, the coefficient of $X^i$ in the polynomial $(X+a)^n - (X^n + a)$ is ${n \choose i} a^{n-i}$, and for $i = 0$, it's $a^n - a$.
 
 If $n$ is a prime, then ${n \choose i} \equiv 0 \equiv a^n - a \mod n$, so the polynomial is identically $0 \mod n$.
 
@@ -392,7 +393,7 @@ In the coming sections we string a series of lemmas to formulate the proof for A
 
 \begin{lemma}
 \label{lemma:AKSLemma1}
-If $n$ is a prime then Algorithm~\ref{algorithm:AKSPrimalityTest} returns $true$.
+If $n$ is a prime then Algorithm~\ref{alg:AKSPrimalityTest} returns $true$.
 \end{lemma}
  
 \begin{proof}
@@ -464,7 +465,7 @@ Now we can define $o_r(n)$. Since $n^i \not \equiv 1 \mod r \ \forall \ r \leq \
 \end{proof}
 
 \subsection{Some definitions}
-We have shown that Algorithm~\ref{algo:AKSPrimalityTest} returns $true$ if input $n$ is a prime. What remains to be shown is that it returns $false$ if $n$ is composite.
+We have shown that Algorithm~\ref{alg:AKSPrimalityTest} returns $true$ if input $n$ is a prime. What remains to be shown is that it returns $false$ if $n$ is composite.
 
 Since $n > 2$, $o_r(n) > 1$. So there exists a prime divisor $p$ of $n$ such that $o_r(p) > 1$. Since $(n,r) = 1$, we have $(p,r) = 1$. Also, $p > r$ else Step $3$ or $4$ would identify that. For the rest of the discussion we would keep $p$ and $r$ fixed. Also let $l = \lfloor \sqrt{\phi(r)} \log n \rfloor$.
 
@@ -486,12 +487,12 @@ l \]
 
 So we have that both $p$ and $\frac{n}{p}$ satisfy $\dagger$. The \emph{AKS} algorithm gives a name to this property,
 
-\begin{lemma}
-\label{lemma:introspective}
+\begin{definition}
+\label{definition:introspective}
 For polynomial $f(X)$ and $m \in \mathbb{N}$, if $m$ satisfies
 \[f(X)^m \equiv f(X^m) \mod (n,X^r-1)\]
 then $m$ is said to be introspective for $f(X)$.
-\end{lemma}
+\end{definition}
 
 \begin{lemma}
 \label{lemma:IntrospectiveLemma1}
@@ -510,7 +511,7 @@ Since $X^{r}-1 | X^{m'r}-1$,
 \[f(X)^{mm'} \equiv f(X^{mm'}) \mod (n, X^r-1)\]
 \end{proof}
 \begin{lemma}
-\label{lemma:IntrospectiveLemma1}
+\label{lemma:IntrospectiveLemma2}
 If $m$ is introspective for both the polynomials $f(X)$ and $g(X)$, then it is also introspective for $f(X) . g(X)$.
 \end{lemma}
 \begin{proof}
@@ -578,7 +579,7 @@ Since $n \geq 2$,
 \end{proof}
 
 \begin{theorem}
-If Algorithm~\ref{algo:AKSPrimalityTest} returns $true$ then input $n$ is prime.
+If Algorithm~\ref{alg:AKSPrimalityTest} returns $true$ then input $n$ is prime.
 \end{theorem}
 \begin{proof}
 Here, we handle the case of $true$ being returned at Step $6$. We make use the last two lemmas,
