@@ -20,6 +20,7 @@ public class AKSSpec {
         AKS aks = new AKS();
         Integer[] primes = {2, 3, 5, 7, 11, 13};
         Integer[] composites = {4, 6, 8, 9, 10, 12, 14, 15};
+
         for (int prime: primes) {
             System.out.println("Testing prime: " + prime);
             assertTrue(aks.primalityTest(BigInteger.valueOf(prime)));

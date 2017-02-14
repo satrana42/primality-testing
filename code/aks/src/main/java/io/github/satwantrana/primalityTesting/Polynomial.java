@@ -15,13 +15,13 @@ public class Polynomial {
         this.n = n;
         this.r = r;
         poly = new ArrayList<BigInteger>(r);
-        for (int i=0;i<r;i++) poly.set(i,BigInteger.ZERO);
+        for (int i=0;i<r;i++) poly.add(BigInteger.ZERO);
     }
     public Polynomial(Polynomial init) {
         this.n = init.getN();
         this.r = init.getR();
         poly = new ArrayList<BigInteger>(r);
-        for (int i=0;i<r;i++) poly.set(i,init.getCoefficient(i));
+        for (int i=0;i<r;i++) poly.add(init.getCoefficient(i));
     }
 
     public int getR() {
@@ -39,6 +39,9 @@ public class Polynomial {
     }
 
     public void setCoefficient(int i, BigInteger val) {
+        i = i%r;
+        val = val.mod(n);
+        if (val.compareTo(BigInteger.ZERO) < 0) val = val.add(n);
         poly.set(i, val);
     }
     public void setCoefficient(BigInteger i, BigInteger val) {
@@ -49,7 +52,7 @@ public class Polynomial {
         BigInteger cur = poly.get(i);
         cur = cur.add(inc);
         cur = cur.mod(n);
-        if (cur.compareTo(n) < 0) cur = cur.add(n);
+        if (cur.compareTo(BigInteger.ZERO) < 0) cur = cur.add(n);
         poly.set(i,cur);
     }
     public void subCoefficient(int i, BigInteger dec) {
@@ -59,7 +62,7 @@ public class Polynomial {
         BigInteger cur = poly.get(i);
         cur = cur.multiply(fac);
         cur = cur.mod(n);
-        if (cur.compareTo(n) < 0) cur = cur.add(n);
+        if (cur.compareTo(BigInteger.ZERO) < 0) cur = cur.add(n);
         poly.set(i,cur);
     }
 
@@ -82,7 +85,8 @@ public class Polynomial {
         for (int i=0;i<r;i++)
             for (int j=0;j<r;j++) {
                 BigInteger inc = getCoefficient(i).multiply(other.getCoefficient(j));
-                inc.mod(n);
+                inc = inc.mod(n);
+                if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
                 res.addCoefficient((i + j) % r, inc);
             }
         return res;
@@ -93,15 +97,15 @@ public class Polynomial {
         Polynomial base = new Polynomial(this);
         res.setCoefficient(0, BigInteger.ONE);
         while (e.compareTo(BigInteger.ZERO) > 0) {
-            if (e.testBit(0)) res.mul(base);
-            base.mul(base);
+            if (e.testBit(0)) res = res.mul(base);
+            base = base.mul(base);
             e = e.divide(BigInteger.valueOf(2));
         }
         return res;
     }
 
     public boolean isEqual(Polynomial other) {
-        for (int i=0;i<r;i++) if (getCoefficient(i) != other.getCoefficient(i)) return false;
+        for (int i=0;i<r;i++) if (!getCoefficient(i).equals(other.getCoefficient(i))) return false;
         return true;
     }
 }

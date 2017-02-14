@@ -20,7 +20,7 @@ public class AKS {
         return false;
     }
     public int calculateR(BigInteger n, int lgn) {
-        for (int r=1;;r++) {
+        for (int r=2;;r++) {
             BigInteger cur = BigInteger.ONE;
             boolean yes = true;
             for (int j=1;j<=lgn*lgn;j++) {
@@ -42,17 +42,25 @@ public class AKS {
         return ret;
     }
     public boolean primalityTest(BigInteger n) {
-        if (n.compareTo(BigInteger.valueOf(2)) < 0) return false;
+        if (n.compareTo(BigInteger.valueOf(2)) < 0) {
+            return false;
+        }
         if (n.compareTo(BigInteger.valueOf(2)) == 0) return true;
-        if (!n.testBit(0)) return false;
+        if (!n.testBit(0)) {
+            return false;
+        }
 
         int lgn = calculateLogN(n);
-        if (perfectPowerTest(n, lgn)) return false;
+        if (perfectPowerTest(n, lgn)) {
+            return false;
+        }
 
         int r = calculateR(n, lgn);
         for (int i=2;i<=r;i++) {
             BigInteger g = n.gcd(BigInteger.valueOf(i));
-            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) return false;
+            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) {
+                return false;
+            }
         }
         if (n.compareTo(BigInteger.valueOf(r)) <= 0) return true;
 
@@ -65,7 +73,9 @@ public class AKS {
             Polynomial right = new Polynomial(n,r);
             right.setCoefficient(0,BigInteger.valueOf(i));
             right.setCoefficient(n,BigInteger.valueOf(1));
-            if (!left.isEqual(right)) return false;
+            if (!left.isEqual(right)) {
+                return false;
+            }
         }
         return true;
     }
