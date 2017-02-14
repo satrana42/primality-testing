@@ -11,7 +11,7 @@
 
 \begin{document}
 
-\title{Primes and How to Reconginze them}
+\title{Primes and How to Recognize them}
 \subtitle{Primality Testing Algorithms}
 \author{Satwant Rana\inst{1}\\[3mm] Advised by, Amitabha Tripathi\inst{2}}
 \institute
@@ -27,7 +27,7 @@
   IIT Delhi
 }
 \date
-{Mid Semester MTP Presentation, 2016}
+{MTP Presentation, 2016-17}
 \subject{Mathematics}
 
 \frame{\titlepage}
@@ -331,9 +331,202 @@ D.H. Lehmer prepared a table of all Fermat pseudoprimes below $2.10^8$ for the b
 \end{frame}
 
 \begin{frame}
-\frametitle{Future Work}
-Planned readings include \emph{Lucas Sequences} based \emph{Primality Tests}, \emph{Lenstra's Theorem} and \emph{A.K.S. Algorithm}.
+\frametitle{A Generalization of Fermat's Theorem}
+The reason why Fermat's Theorem can only be a used to create a Compositeness Test, is that it's only a necessary condition on primality. Here's a (generalized) necessary and sufficient generalization of Fermat's Little Theorem.
 \\[3mm]
-We plan to implement key algorithms from the above (and elsewhere) as well, in a modern programming language.
+\begin{theorem}
+\label{theorem:GeneralisedFermatLittleTheorem}
+Given $n \in \mathbb{N}$, $n \geq 2$ and $a \in \mathbb{Z}$, $(a,n) = 1$, then $n$ is prime if and only if
+\[ (X+a)^n \equiv X^n + a \mod n \]
+\end{theorem}
 \end{frame}
+
+\begin{frame}
+\frametitle{A Generalization of Fermat's Theorem}
+A simple primality test - Choose an apt $a$, and then test the congruence $(X+a)^n \equiv X^n + a \mod n$. But there are $O(n)$ terms in the polynomial, making our test $\Omega(n)$.
+\\[3mm]
+One way to reduce the number of terms in the polynomial is to consider the congruences modulo $X^r-1$ additionally, for a small $r$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Build-up to a Polynomial Time Primality Test}
+To make things concrete, we consider the congruence,
+\[(X+a)^n \equiv X^n+a \mod (n, X^r-1)\]
+and build a primality test around it.
+\\[3mm]
+The above congruence follows for prime $n$ as before, but depending upon how small $r$ we chose, some composite values of $n$ may also satisfy the congruence now.
+\\[3mm]
+\emph{AKS Primality Test} uses a polynomial $r$, and a polynomial number of values of $a$ to deduce whether $n$ is a prime or not. 
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test}
+\begin{algorithm}[H]
+\caption{AKS Primality Test}
+\label{alg:AKSPrimalityTest}
+\begin{algorithmic}
+\Procedure{AKSPrimalityTest}{$n$} 
+
+\If {$n < 2$ or $n = a^b$ for $a, b \in \mathbb{N}$ and $b \geq 2$}
+	\State \Return $false$  \Comment {Step 1}
+\EndIf
+
+\State $r \gets min \{i: i \in \mathbb{N},\ i \leq \max(3,\ \lceil \log^5 n \rceil),\ o_i(n) > \log^2 n \}$ \Comment {Step 2}
+
+\For {$a = 2$, $i \leq r$, $a \gets a+1$}
+	\If {$1 < (a,n) < n$}
+		\State \Return $false$  \Comment {Step 3}
+	\EndIf
+\EndFor
+
+\If {$n \leq r$}
+	\Return $true$  \Comment {Step 4}
+\EndIf
+
+\For {$a = 1$, $a \leq \lfloor \sqrt{\phi(r)} \log n \rfloor$, $a \gets a+1$}
+	\If {$(X+a)^n \not \equiv X^n + a \mod (n, X^r - 1)$}
+		\State \Return $false$  \Comment {Step 5}
+	\EndIf
+\EndFor
+\State \Return $true$ \Comment {Step 6}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Prime Input}
+\begin{lemma}
+\label{lemma:AKSLemma1}
+If $n$ is a prime then Algorithm~\ref{alg:AKSPrimalityTest} returns $true$.
+\end{lemma}
+\begin{proof}
+If $n$ is a prime, then Steps $1$ and $3$ can never return $false$. Also by previous discussion, Step $5$ can't return $false$. So the algorithm returns $true$ in either Step $4$ or Step $6$.
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Is $n$ a perfect power?}
+\begin{algorithm}[H]
+\caption{Perfect Power Test}
+\label{alg:PerfectPowerTest}
+\begin{algorithmic}
+\Procedure{PerfectPowerTest}{$n$}
+\If {$n = 1$}
+	\State \Return $true$
+\EndIf
+\For {$b \gets 2$, $b \leq \log n, b \gets b+1$}
+	\State $l \gets 1, u \gets n$
+	\While {$l < u$}
+		\State $m \gets \lfloor \frac{l+u}{2} \rfloor$
+		\State $x \gets m^b$ \Comment{Use Logarithmic Exponentiation here}
+		\If {$x = n$}
+			\ \Return $true$
+		\ElsIf {$x < n$}
+			\ $l \gets m+1$
+		\Else
+			\ $r \gets m-1$
+		\EndIf
+	\EndWhile
+\EndFor
+\State \Return $false$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Time Complexity - $O(\log^4 n)$
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Existence of a small $r$}
+
+\begin{lemma}
+\label{lemma:LCMLemma}
+Let $LCM(m)$ be $lcm$ of first $m$ numbers. We have for $m \geq 7$,
+\[LCM(m) \geq 2^m\]
+\end{lemma}
+
+\begin{lemma}
+\label{lemma:AKSLemma2}
+There exists an $r \leq \max(3, \lceil \log^5 n \rceil)$ and $o_r(n) > \log^2 n$.
+\end{lemma}
+\ 
+\\[3mm]
+Consider the smallest $r \in \mathbb{N}$ which doesn't divide the product $P$ defined as,
+\[P = n^{\log B}\ .\ \prod_{i=1}^{\lfloor \log^2 n \rfloor}{n^i-1} \]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Some definitions}
+Remaining case is of composite $n$. Let $p | n$, so $(p,r) = (n,r) = 1$.
+\[\forall\ 0 \leq a \leq l\]
+\[(X+a)^n \equiv X^n + a \mod (n, X^r - 1)\]
+\[(X+a)^p \equiv X^p + a \mod (n,X^r-1)\]
+\[\implies ((X+a)^p)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\]
+\[\implies (X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\]
+\[\implies (X+a)^{\frac{n}{p}} \equiv X^{\frac{n}{p}} + a \mod (n, X^r - 1)\]
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Some definitions}
+\begin{definition}
+\label{definition:introspective}
+For polynomial $f(X)$ and $m \in \mathbb{N}$, if $m$ satisfies
+\[f(X)^m \equiv f(X^m) \mod (n,X^r-1)\]
+then $m$ is said to be introspective for $f(X)$.
+\end{definition}
+
+\begin{lemma}
+\label{lemma:IntrospectiveLemma1}
+If $m$ and $m'$ are both introspective for a polynomial $f(X)$, then so is $m . m'$.
+\end{lemma}
+
+\begin{lemma}
+\label{lemma:IntrospectiveLemma2}
+If $m$ is introspective for both the polynomials $f(X)$ and $g(X)$, then it is also introspective for $f(X) . g(X)$.
+\end{lemma}
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - About two groups}
+Every number in the set $I = \{\frac{n}{p}^i.p^j\ |\ i,j \in \mathbb{N}_0\}$ is introspective for every polynomial in the set $P = \{\prod_{a=0}^{l}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$.
+\\[3mm]
+The first group is the set of residues of all elements of $I$ modulo $r$. Let's denote this set as $G$, and it is a subset of $\mathbb{Z}_r^*$ as $(n,r) = (p,r) = 1$. Let $t = |G|$. Since $n^i \in G \ \forall \ i \in \mathbb{N}_0$ and $o_r(n) > \log^2(n)$, we have $t > \log^2(n)$.
+\\[3mm]
+Let $Q_r(X)$ be $r^{th}$ cyclotomic polynomial over $F_p$. $Q_r(X)$ factors $X^r-1$ into irreducible factors of degree $o_r(p)$. Let $h(X)$ be one such irreducible factor. Since $o_r(p) > 1$, degree of $h(X)$ is greater than one. The second group is the set of all residues of polynomials in $P$ modulo $h(X)$ and $p$. Let $\mathcal{G}$ be this group. This group is generated by elements $X, X + 1, X + 2, \dots, X + l$ in the field $F = F_p[X]/(h(X))$ and is a subgroup of the multiplicative group of $F$.
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Estimating the size of $\mathcal{G}$}
+\begin{lemma}
+[Lenstra]\label{lemma:GLowerBound}
+$|\mathcal{G}| \geq {{t+l} \choose {t-1}}$
+\end{lemma}
+\ 
+\\[3mm]
+\begin{lemma}
+\label{lemma:GUpperBound}
+If $n$ is not a power of $p$, then $|\mathcal{G}| \leq n^{\sqrt{t}}$
+\end{lemma}
+\end{frame}
+
+\begin{frame}
+\frametitle{AKS Primality Test - Completing the proof}
+\begin{theorem}
+If Algorithm~\ref{alg:AKSPrimalityTest} returns $true$ then input $n$ is prime.
+\end{theorem}
+\[|\mathcal{G}| \geq {{t+l} \choose {t-1}}\]
+\[|\mathcal{G}| \geq {{{\lfloor \sqrt t \log n \rfloor} + 1 + l} \choose {\lfloor \sqrt t \log n \rfloor}}\]
+\[|\mathcal{G}| \geq {{2{\lfloor \sqrt t \log n \rfloor}+1} \choose {\lfloor \sqrt t \log n \rfloor}}\]
+\[|\mathcal{G}| \geq 2^{{\lfloor \sqrt t \log n \rfloor}+1} > 2^{\sqrt t \log n} = n^{\sqrt t}\]
+So $n$ is a power of $p$.
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Future Work}
+%Planned readings include \emph{Lucas Sequences} based \emph{Primality Tests}, \emph{Lenstra's Theorem} and \emph{A.K.S. Algorithm}.
+%\\[3mm]
+%We plan to implement key algorithms from the above (and elsewhere) as well, in a modern programming language.
+%\end{frame}
+
 \end{document}
