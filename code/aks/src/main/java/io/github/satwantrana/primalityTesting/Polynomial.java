@@ -78,8 +78,13 @@ public class Polynomial {
     }
 
     public Polynomial mul(Polynomial other) {
-        return mulNaive(other);
+        Polynomial temp = mulKaratsuba(other);
+        Polynomial res = new Polynomial(n, r);
+        int s = (r + 1) / 2;
+        for (int i = 0; i < 4 * s; i++) res.addCoefficient(i % r, temp.getCoefficient(i));
+        return res;
     }
+
     private Polynomial mulNaive(Polynomial other) {
         Polynomial res = new Polynomial(n,r);
         for (int i=0;i<r;i++)
@@ -89,6 +94,40 @@ public class Polynomial {
                 if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
                 res.addCoefficient((i + j) % r, inc);
             }
+        return res;
+    }
+    private Polynomial mulKaratsuba(Polynomial other) {
+        int s = (r+1)/2;
+        Polynomial res = new Polynomial(n, 4 * s);
+        if (r <= 2) {
+            for (int i=0;i<r;i++)
+                for (int j=0;j<r;j++) {
+                    BigInteger inc = getCoefficient(i).multiply(other.getCoefficient(j));
+                    inc = inc.mod(n);
+                    if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
+                    res.addCoefficient(i+j, inc);
+                }
+        } else {
+            Polynomial A = new Polynomial(n, s);
+            Polynomial B = new Polynomial(n, s);
+            Polynomial C = new Polynomial(n, s);
+            Polynomial D = new Polynomial(n, s);
+            for (int i = 0; i < r; i++) {
+                if (i < s) {
+                    A.setCoefficient(i, getCoefficient(i));
+                    C.setCoefficient(i, other.getCoefficient(i));
+                } else {
+                    B.setCoefficient(i - s, getCoefficient(i));
+                    D.setCoefficient(i - s, other.getCoefficient(i));
+                }
+            }
+            Polynomial t1 = B.mulKaratsuba(D);
+            for (int i = 0; i < 2 * s; i++) res.addCoefficient(2 * s + i, t1.getCoefficient(i));
+            Polynomial t2 = A.mulKaratsuba(C);
+            for (int i = 0; i < 2 * s; i++) res.addCoefficient(i, t2.getCoefficient(i));
+            Polynomial t3 = A.add(B).mulKaratsuba(C.add(D)).sub(t1).sub(t2);
+            for (int i = 0; i < 2 * s; i++) res.addCoefficient(s + i, t3.getCoefficient(i));
+        }
         return res;
     }
 

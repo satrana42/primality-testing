@@ -4,8 +4,10 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+import org.omg.PortableInterceptor.INACTIVE;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,6 +31,14 @@ public class AKSSpec {
             System.out.println("Testing composite: " + composite);
             assertFalse(aks.primalityTest(BigInteger.valueOf(composite)));
         }
+    }
+
+    @Test
+    public void SieveTest() {
+        AKS aks = new AKS();
+        int n = 100000;
+        Boolean[] sieve = NumberTheory.sieve(n);
+        for (int i=1;i<=n;i++) assertEquals(sieve[i], aks.primalityTest(BigInteger.valueOf(i)));
     }
 
     public static void main(String[] args) {

@@ -20,7 +20,7 @@ public class AKS {
         return false;
     }
     public int calculateR(BigInteger n, int lgn) {
-        for (int r=2;;r++) {
+        for (int r=lgn*lgn;;r++) {
             BigInteger cur = BigInteger.ONE;
             boolean yes = true;
             for (int j=1;j<=lgn*lgn;j++) {
@@ -34,7 +34,7 @@ public class AKS {
         }
     }
     public int calculateLogN(BigInteger n) {
-        int ret = 1;
+        int ret = 0;
         while (n.compareTo(BigInteger.ZERO) > 0) {
             ret++;
             n = n.divide(BigInteger.valueOf(2));
@@ -65,7 +65,8 @@ public class AKS {
         if (n.compareTo(BigInteger.valueOf(r)) <= 0) return true;
 
         int l = (int) (Math.sqrt(NumberTheory.phi(r))*lgn);
-        for (int i=0;i<=l;i++) {
+        System.out.println("S: " + n + " " + r + " " + lgn + " " + l);
+        for (int i=1;i<=l;i++) {
             Polynomial left = new Polynomial(n,r);
             left.setCoefficient(0,BigInteger.valueOf(i));
             left.setCoefficient(1,BigInteger.valueOf(1));
@@ -74,6 +75,7 @@ public class AKS {
             right.setCoefficient(0,BigInteger.valueOf(i));
             right.setCoefficient(n,BigInteger.valueOf(1));
             if (!left.isEqual(right)) {
+                System.out.println("F: " + n + " " + i);
                 return false;
             }
         }
