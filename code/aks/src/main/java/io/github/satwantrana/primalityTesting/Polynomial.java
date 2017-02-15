@@ -78,6 +78,7 @@ public class Polynomial {
     }
 
     public Polynomial mul(Polynomial other) {
+        if (r <= 10) return mulNaive(other);
         Polynomial temp = mulKaratsuba(other);
         Polynomial res = new Polynomial(n, r);
         int s = (r + 1) / 2;
@@ -91,7 +92,7 @@ public class Polynomial {
             for (int j=0;j<r;j++) {
                 BigInteger inc = getCoefficient(i).multiply(other.getCoefficient(j));
                 inc = inc.mod(n);
-                if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
+//                if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
                 res.addCoefficient((i + j) % r, inc);
             }
         return res;
@@ -104,7 +105,7 @@ public class Polynomial {
                 for (int j=0;j<r;j++) {
                     BigInteger inc = getCoefficient(i).multiply(other.getCoefficient(j));
                     inc = inc.mod(n);
-                    if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
+//                    if (inc.compareTo(BigInteger.ZERO) < 0) inc = inc.add(n);
                     res.addCoefficient(i+j, inc);
                 }
         } else {
@@ -143,7 +144,7 @@ public class Polynomial {
         return res;
     }
 
-    public boolean isEqual(Polynomial other) {
+    public boolean equals(Polynomial other) {
         for (int i=0;i<r;i++) if (!getCoefficient(i).equals(other.getCoefficient(i))) return false;
         return true;
     }

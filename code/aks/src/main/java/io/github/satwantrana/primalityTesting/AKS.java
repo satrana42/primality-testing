@@ -21,12 +21,12 @@ public class AKS {
     }
     public int calculateR(BigInteger n, int lgn) {
         for (int r=lgn*lgn;;r++) {
-            BigInteger cur = BigInteger.ONE;
+            int nn = n.mod(BigInteger.valueOf(r)).intValue();
+            int cur = 1;
             boolean yes = true;
             for (int j=1;j<=lgn*lgn;j++) {
-                cur = cur.multiply(n);
-                cur = cur.mod(BigInteger.valueOf(r));
-                if (cur.compareTo(BigInteger.ONE) == 0) {
+                cur = (int) (cur*1L*nn)%r;
+                if (cur == 1) {
                     yes = false; break;
                 }
             }
@@ -66,16 +66,16 @@ public class AKS {
 
         int l = (int) (Math.sqrt(NumberTheory.phi(r))*lgn);
         System.out.println("S: " + n + " " + r + " " + lgn + " " + l);
-        for (int i=1;i<=l;i++) {
+        for (int a=1; a<=l; a++) {
             Polynomial left = new Polynomial(n,r);
-            left.setCoefficient(0,BigInteger.valueOf(i));
+            left.setCoefficient(0,BigInteger.valueOf(a));
             left.setCoefficient(1,BigInteger.valueOf(1));
             left = left.exp(n);
             Polynomial right = new Polynomial(n,r);
-            right.setCoefficient(0,BigInteger.valueOf(i));
+            right.setCoefficient(0,BigInteger.valueOf(a));
             right.setCoefficient(n,BigInteger.valueOf(1));
-            if (!left.isEqual(right)) {
-                System.out.println("F: " + n + " " + i);
+            if (!left.equals(right)) {
+                System.out.println("F: " + n + " " + a);
                 return false;
             }
         }

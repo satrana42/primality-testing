@@ -1,7 +1,5 @@
 package io.github.satwantrana.primalityTesting;
 
-import java.util.ArrayList;
-
 /**
  * Created by satwant on 12/2/17.
  */
