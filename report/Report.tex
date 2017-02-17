@@ -404,7 +404,7 @@ If $n$ is a prime, then Steps $1$ and $3$ can never return $false$. Also by disc
 \subsection{Is $n$ a perfect power?}
 The check for Step $1$ can be done in $O(\log^3 n)$ arithmetical operations. We need to find whether there exist $a, b \in \mathbb{N}, b \geq 2$ such that $n = a^b$. The idea is as follows. We iterate over all $1 \leq b \leq \log n$ and binary search for the root $a$ of the equation $n = a^b$. 
 
-We present the details in Algorithm~\ref{alg:PerfectPowerTest}. It involves $\log n$ iterations for $b$, $\log n$ iterations for binary search, and $\log n$ arithmetic operations for logarithmic exponentiation. So, overall it takes $O(\log^3 n)$ arithmetic operations to check if $n$ is a perfect power. Numbers can get as large as $n$, so it takes $O(\log n)$ time for arithmetic operations, and $O(\log^4 n)$ time overall.
+We present the details in Algorithm~\ref{alg:PerfectPowerTest}. It involves $\log n$ iterations for $b$, $\log n$ iterations for binary search, and $\log n$ arithmetic operations for logarithmic exponentiation. So, overall it takes $O(\log^3 n)$ arithmetic operations to check if $n$ is a perfect power. Numbers can take as much as $\log n$ space, so it takes $\tilde O(\log n)$ time for arithmetic operations, and $\tilde O(\log^4 n)$ time overall. Here $\tilde O(f(n)) = O(f(n) \cdot \log^{\epsilon} f(n))$, for some constant $\epsilon$.
 
 \begin{algorithm}
 \caption{Perfect Power Test}
@@ -482,11 +482,12 @@ From $\dagger$ we have,
 By combining the last two equations we get,
 \[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \]
 
-Since $X$ is a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$ and $(p,r) = 1$, $X^p$ is also a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$. Conversely, every primitive $r^{th}$ root of unity can be arrived at in this fashion. And therefore,
+Since $X$ is a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$ and $(p,r) = 1$, $X^p$ is also a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$. So, $X = X^{pq}$, where $pq \equiv 1 \mod r$. Therefore,
+\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, (X^p)^r - 1)\ \forall\ 0 \leq a \leq l \] Conversely, every primitive $r^{th}$ root of unity can be arrived at in this fashion. And therefore,
 \[(X+a)^{\frac{n}{p}} \equiv X^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq 
 l \]
-%%The part above needs rigor
-So we have that both $p$ and $\frac{n}{p}$ satisfy $\dagger$. The \emph{AKS} algorithm gives a name to this property,
+
+So we conclude that both $p$ and $\frac{n}{p}$ satisfy $\dagger$. The \emph{AKS} algorithm gives a name to this property,
 
 \begin{definition}
 \label{definition:introspective}
@@ -542,7 +543,7 @@ We begin by reminding that since $h(X)$ is a factor of $Q_r(X)$, $X$ is a primit
 
 We show that any two distinct polynomials $f(X), g(X) \in P$ with degree less than $t$, map to different elements in $\mathcal{G}$. Let's assume to the contrary that $f(X) = g(X)$ in $F$. Let $m \in I$. We also have $f(X)^m = g(X)^m$ in $F$. Since $m$ is introspective for $f(X)$ and $g(X)$, and $h(X)$ divides $X^r-1$, we have $f(X^m) = g(X^m)$ in $F$. So, $X^m$ is a root of the the polynomial $Q(Y) = f(Y) - g(Y)$ in $F$, for every $m \in G$ (as $h(X)$ divides $X^r-1$). Now $G \subset \mathbb{Z}_r^*$, so $(m,r) = 1$, and hence $X^m$ is a distinct primitive $r^{th}$ root of unity for every $m \in G$. This means that $Q(Y)$ has atleast $t = |G|$ roots in $F$. However the degree of $Q(Y)$ is less than $t$ because of the choice of $f(X)$ and $g(X)$. Hence, $f(X) \neq g(X)$ in $F$.
 
-Now, if $0 \leq i \neq j \leq l$ then $i \neq j$ in $F_p$ as $l = \lfloor \sqrt{\phi(r)} \log n\rfloor < \phi(r) < r < p$. The first inequality is true becuase $\log^2{n} < o_r(n) < \phi(r)$. So $X, X+1, X+2, \dots, X+l$ are all distinct in $F = F_p[X]/(h(X))$. Also since degree of $h(X)$ is greater than $1$, $X+a \neq 0\ \forall \ 0 \leq a \leq l$. Therefore, there are atleast $l+1$ distibct polynomials of degree $1$ in $\mathcal{G}$.
+Now, if $0 \leq i \neq j \leq l$ then $i \neq j$ in $F_p$ as $l = \lfloor \sqrt{\phi(r)} \log n\rfloor < \phi(r) < r < p$. The first inequality is true becuase $\log^2{n} < o_r(n) < \phi(r)$. So $X, X+1, X+2, \dots, X+l$ are all distinct in $F = F_p[X]/(h(X))$. Also since degree of $h(X)$ is greater than $1$, $X+a \neq 0\ \forall \ 0 \leq a \leq l$. Therefore, there are atleast $l+1$ distinct polynomials of degree $1$ in $\mathcal{G}$.
 
 We can now estimate the number of polynomials of degree less than $t$ in $F$. The set $P_t = \{\prod_{a=0}^{l}(X+a)^{e_a}\ | \ \sum_{a=0}^{l}e_a \leq t-1\}$ is a subset of the set of polynomials with degree $<t$ in $\mathcal{G}$, and $|P_t| = {{l+t}\choose{t-1}}$. As discussed above all these polynomials are distinct in $\mathcal{G}$, and therefore $|\mathcal{G}| \geq {{t+l} \choose {t-1}}$.
 \end{proof}
@@ -599,13 +600,13 @@ But we know that $|\mathcal{G}| \leq n^{\sqrt t}$ unless $n$ is power of a prime
 \end{proof}
 
 \subsection{Time Complexity analysis}
-As discussed before, Step $1$ can be done in $O(\log^4 n)$ time.
+As discussed before, Step $1$ can be done in $\tilde O(\log^4 n)$ time.
 
-Step $2$ involves calculating if order is greater than $\log^2 n$ for $\log^5 n$ numbers. This can be checked by calculating $n^i$ succesively for $1 \leq i \leq \lceil \log^5 n \rceil$. The numbers can get as large as $\log^5 n$. So it takes \\$O({\log^5 n}\ .\ {\log^2 n}\ .\ {\log{\log^5 n}}) = O(\log^8 n)$ time for this step.
+Step $2$ involves calculating if order is greater than $\log^2 n$ for $\log^5 n$ numbers. This can be checked by calculating $n^i$ succesively for $1 \leq i \leq \lceil \log^5 n \rceil$. The size of the numbers can get as large as $\log \log^5 n$. So it takes $\tilde O({\log^5 n} \cdot {\log^2 n}) = \tilde O(\log^7 n)$ time for this step.
 
 Step $3$ is gcd calcuation for numbers as large as $n$, so it can be done in $O(\log^2 n)$ time.
 
-What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log n \rfloor = O(\log^{3.5}n)$ iterations. Each iterations involve exponentiation of polynomials. Each exponentiation takes $O(\log n)$ iterations. There are $O(r)$ terms in each polynomial, and coefficients are as large as $n$. So it takes \\$O({log^{3.5}n}\ .\ {\log n}\ .\ {r}\ .\ {\log n})= O(\log^{10.5}n)$. This step dominates the time complexity, and hence the time complexity of overall algorithm is $O(\log^{10.5}n)$
+What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log n \rfloor = O(r^{1/2} \log n)$ iterations. Each iterations involve exponentiation of polynomials. Each exponentiation takes $O(\log n)$ iterations. There are $O(r)$ terms in each polynomial, and coefficients are as large as $n$. So it takes $\tilde O({r^{3/2} \log^3 n})= \tilde O(\log^{10.5}n)$. This step dominates the time complexity, and hence the time complexity of overall algorithm is $\tilde O(\log^{10.5}n)$
 
 \subsection{Implementation and Simulations}
 \begin{figure}
@@ -613,11 +614,11 @@ What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log
   \caption{AKS simulations for $n \leq 5000$.}
   \label{fig:aks_5000}
 \end{figure}
-An implementation of AKS, in accordance to this text, can be found at \\\texttt{https://github.com/satwantrana/primality-testing}. The code works for input of arbitrary size. The present implementation uses Karatsuba multiplication algorithm for polynomial multiplication and thus the algorithm is slightly slower than the previously discussed complexity. 
+An implementation of AKS, in accordance to this text, can be found at \\\texttt{https://github.com/satwantrana/primality-testing}. The code works for input of arbitrary size. The present implementation uses a combination of Quadratic, Karatsuba and Toom-Cook multiplication algorithms for polynomial and integer multiplication and thus the algorithm is slightly slower than the previously discussed complexity.
 
-Figure~\ref{fig:aks_5000} represents the values of $r$, $\log n$ and $l$ against $n$ along the $x$-axis, for $n \leq 5000$. It can be seen that $r \sim \log^2 n$, and therefore $l \sim r$ in this range. These values are much smaller than the upper bound of $\log^5 n$ and much closer to the lower bound of $\log^2 n$. Also, both $r$ and $l$ increase roughly in a step-fuction fashion along with $\log n$. 
+Figure~\ref{fig:aks_5000} represents the values of $r$ and $l$ against $n$ along the $x$-axis, for $n \leq 5000$. It can be seen that $r \sim \log^2 n$, and therefore $l \sim r$ in this range. These values are much smaller than the upper bound of $\log^5 n$ and much closer to the lower bound of $\log^2 n$. Also, both $r$ and $l$ increase roughly in a step-fuction fashion along with $\log^2 n$. 
 
-Figure~\ref{fig:aks_2000} represents the time taken by the code to evaluate the primality of input $n$, for $n \leq 2000$. The expected number of iterations in the algorithm is $O(\log^{6.58} n)$, as $r \sim log^2 n$ and multiplication algorithm is Karatsuba. The observed runtimes suggest that the constant of complexity is $\sim 100$. We can expect a clever implementation to bring this number down. 
+Figure~\ref{fig:aks_2000} represents the time taken by the code to evaluate the primality of input $n$, for $n \leq 2000$. The expected number of iterations in the algorithm is $O(\log^{4 + 2\log3} n)$, as $r \sim log^2 n$ and multiplication algorithm for polynomials is Karatsuba in this range. The observed runtimes suggest that the constant of complexity is $\sim 100$. One can expect a clever implementation to bring this number down. 
 
 The most expensive part of the algorithm is Step $5$, where $l$ equations in $\mathbb{Z}_n[X]/(X^r-1)$ have to be checked. All the numbers which fail this step are composite numbers with no prime factor $\leq r$. A simulation reveals that such $n \leq 1.4 \cdot 10^6$, fail the test at $a = 1$ itself. A further investigation in this direction can lead to smaller value for $l$, which can reduce the overall time complexity of the AKS primality test.
 

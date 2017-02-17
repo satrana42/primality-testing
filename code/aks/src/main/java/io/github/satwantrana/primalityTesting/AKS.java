@@ -34,12 +34,7 @@ public class AKS {
         }
     }
     public int calculateLogN(BigInteger n) {
-        int ret = 0;
-        while (n.compareTo(BigInteger.ZERO) > 0) {
-            ret++;
-            n = n.divide(BigInteger.valueOf(2));
-        }
-        return ret;
+        return n.bitLength();
     }
     public boolean primalityTest(BigInteger n) {
         if (n.compareTo(BigInteger.valueOf(2)) < 0) return false;
@@ -52,10 +47,10 @@ public class AKS {
 
         int r = calculateR(n, lgn);
         for (int i=2;i<=r;i++) {
-//            BigInteger[] dr = n.divideAndRemainder(BigInteger.valueOf(i));
-//            if (dr[1].compareTo(BigInteger.ZERO) == 0 && dr[0].compareTo(BigInteger.ONE) > 0) return false;
-            BigInteger g = n.gcd(BigInteger.valueOf(i));
-            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) return false;
+            BigInteger[] dr = n.divideAndRemainder(BigInteger.valueOf(i));
+            if (dr[1].compareTo(BigInteger.ZERO) == 0 && dr[0].compareTo(BigInteger.ONE) > 0) return false;
+//            BigInteger g = n.gcd(BigInteger.valueOf(i));
+//            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) return false;
         }
         if (n.compareTo(BigInteger.valueOf(r)) <= 0) return true;
 
