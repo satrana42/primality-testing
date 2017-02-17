@@ -6,6 +6,7 @@
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{amsthm}
+\usepackage{enumerate}
 \usepackage{mathtools}
 \usepackage{mathrsfs}
 \usepackage{graphicx}
@@ -618,7 +619,7 @@ An implementation of AKS, in accordance to this text, can be found at \\\texttt{
 
 Figure~\ref{fig:aks_5000} represents the values of $r$ and $l$ against $n$ along the $x$-axis, for $n \leq 5000$. It can be seen that $r \sim \log^2 n$, and therefore $l \sim r$ in this range. These values are much smaller than the upper bound of $\log^5 n$ and much closer to the lower bound of $\log^2 n$. Also, both $r$ and $l$ increase roughly in a step-fuction fashion along with $\log^2 n$. 
 
-Figure~\ref{fig:aks_2000} represents the time taken by the code to evaluate the primality of input $n$, for $n \leq 2000$. The expected number of iterations in the algorithm is $O(\log^{4 + 2\log3} n)$, as $r \sim log^2 n$ and multiplication algorithm for polynomials is Karatsuba in this range. The observed runtimes suggest that the constant of complexity is $\sim 100$. One can expect a clever implementation to bring this number down. 
+Figure~\ref{fig:aks_2000} represents the time taken by the code to evaluate the primality of input $n$, for $n \leq 2000$. The expected number of iterations in the algorithm is $O(\log^{4 + 2\log3} n)$, as $r \sim log^2 n$ and multiplication algorithm for polynomials is Karatsuba in this range. The observed runtimes suggest that the constant of complexity is $\sim 100$. Arbitrary precision arithmetic requires frequent memory references, which explains the large constant. A clever implementation can bring this number down by a factor, but still this shows that AKS is impractical as a primality test even for small numbers. 
 
 The most expensive part of the algorithm is Step $5$, where $l$ equations in $\mathbb{Z}_n[X]/(X^r-1)$ have to be checked. All the numbers which fail this step are composite numbers with no prime factor $\leq r$. A simulation reveals that such $n \leq 1.4 \cdot 10^6$, fail the test at $a = 1$ itself. A further investigation in this direction can lead to smaller value for $l$, which can reduce the overall time complexity of the AKS primality test.
 
@@ -627,6 +628,27 @@ The most expensive part of the algorithm is Step $5$, where $l$ equations in $\m
   \caption{AKS simulations for $n \leq 2000$.}
   \label{fig:aks_2000}
 \end{figure}
+
+\begin{lemma}
+\label{lemma:AKSGenerelisation1}
+If it is known that $k$ distinct primes divide $n$, then the bounds of AKS Primality Test can be improved to the following,
+\begin{enumerate}[1.]%for capital roman numbers.
+\item Choice of $r$ is such that $o_r(n) > \log^{1 + \frac 1 {k}} n$.
+\item Such an $r$ would exist with $r \leq \log^{3 + \frac 2 {k}} n$.
+\item $l$ is improved to $l = \phi^\frac{1}{k+1}(r) \log n$.
+\item The overall time complexity is reduced to $\tilde O(\log^{3 + (3 + \frac{2}{k})(1 + \frac{1}{k+1})} n)$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test.
+If primes $p_i | n\ \forall \ 1 \leq i \leq k$, then we can iteratively deduce for increasing $j$,
+\[(X+a)^{n/\prod_{i=1}^{i=j} p_i} \equiv X^{n/\prod_{i=1}^{i=j} p_i} + a \mod (n, X^r - 1)\]
+with $1 \leq j \leq k$, using the same arguments as section $14.3$. 
+
+Now, if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
+\[I' = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}} \ \vert \ 0 \leq i_j \leq \lfloor n^\frac{1}{k+1} \rfloor \}\]
+and redo the same analysis as the original algorithm, with the modified bounds, the result follows.
+\end{proof}
 
 \begin{thebibliography}{9}
 \bibitem{riesel} 

@@ -71,6 +71,38 @@ public class AKSSpec {
         }
     }
 
+    @Test
+    public void RValueTest() {
+        AKS aks = new AKS();
+        int upper = 1500;
+        int lower = aks.calculateLogN(BigInteger.valueOf(upper).pow(3));
+        lower = lower*lower + 1;
+        Boolean[] sieve = NumberTheory.sieve(upper);
+        System.out.println(lower);
+        for (int i=lower;i<=upper;i++) if (sieve[i]) {
+            for (int j=i+1;j<=upper;j++) if (sieve[j]) {
+                for (int k=j+1;k<=upper;k++) if (sieve[k]) {
+                    BigInteger n = BigInteger.valueOf((long) i * j * k);
+                    int lgn = aks.calculateLogN(n);
+                    int r = aks.calculateR(n,lgn);
+                    System.out.println(n + " " + lgn + " " + r);
+                    Map<Integer, Integer> factors = NumberTheory.factorize(i*j*k);
+                    boolean toProcess = true;
+                    if (factors.size() == 1) toProcess = false;
+                    else for (int p: factors.keySet()) if (p <= r) {
+                        System.out.println("F: " + n + " " + p);
+                        toProcess = false; break;
+                    }
+                    if (toProcess) {
+                        assertEquals(false, aks.primalityTest(n));
+                    } else {
+                        System.out.print(' ');
+                    }
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Result result = JUnitCore.runClasses(AKSSpec.class);
 
