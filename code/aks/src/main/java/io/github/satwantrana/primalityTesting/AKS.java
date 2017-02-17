@@ -42,30 +42,25 @@ public class AKS {
         return ret;
     }
     public boolean primalityTest(BigInteger n) {
-        if (n.compareTo(BigInteger.valueOf(2)) < 0) {
-            return false;
-        }
+        if (n.compareTo(BigInteger.valueOf(2)) < 0) return false;
+
         if (n.compareTo(BigInteger.valueOf(2)) == 0) return true;
-        if (!n.testBit(0)) {
-            return false;
-        }
+        if (!n.testBit(0)) return false;
 
         int lgn = calculateLogN(n);
-        if (perfectPowerTest(n, lgn)) {
-            return false;
-        }
+        if (perfectPowerTest(n, lgn)) return false;
 
         int r = calculateR(n, lgn);
         for (int i=2;i<=r;i++) {
+//            BigInteger[] dr = n.divideAndRemainder(BigInteger.valueOf(i));
+//            if (dr[1].compareTo(BigInteger.ZERO) == 0 && dr[0].compareTo(BigInteger.ONE) > 0) return false;
             BigInteger g = n.gcd(BigInteger.valueOf(i));
-            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) {
-                return false;
-            }
+            if (g.compareTo(BigInteger.ONE) > 0 && g.compareTo(n) < 0) return false;
         }
         if (n.compareTo(BigInteger.valueOf(r)) <= 0) return true;
 
         int l = (int) (Math.sqrt(NumberTheory.phi(r))*lgn);
-        System.out.println("S: " + n + " " + r + " " + lgn + " " + l);
+//        System.out.println("S: " + n + " " + r + " " + lgn + " " + l);
         for (int a=1; a<=l; a++) {
             Polynomial left = new Polynomial(n,r);
             left.setCoefficient(0,BigInteger.valueOf(a));
@@ -75,7 +70,7 @@ public class AKS {
             right.setCoefficient(0,BigInteger.valueOf(a));
             right.setCoefficient(n,BigInteger.valueOf(1));
             if (!left.equals(right)) {
-                System.out.println("F: " + n + " " + a);
+//                System.out.println("F: " + n + " " + a);
                 return false;
             }
         }

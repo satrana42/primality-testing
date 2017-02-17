@@ -1,5 +1,7 @@
 package io.github.satwantrana.primalityTesting;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.sun.org.apache.xpath.internal.operations.Number;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -8,6 +10,9 @@ import org.omg.PortableInterceptor.INACTIVE;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Timer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +43,32 @@ public class AKSSpec {
         AKS aks = new AKS();
         int n = 100000;
         Boolean[] sieve = NumberTheory.sieve(n);
-        for (int i=1;i<=n;i++) assertEquals(sieve[i], aks.primalityTest(BigInteger.valueOf(i)));
+        for (int i=1;i<=n;i++) {
+            long start = System.currentTimeMillis();
+            assertEquals(sieve[i], aks.primalityTest(BigInteger.valueOf(i)));
+            long end = System.currentTimeMillis();
+            long dur = end - start;
+            if (dur > 0) System.out.println("T: " + i + " " + dur);
+        }
+    }
+
+    @Test
+    public void LValueTest() {
+        AKS aks = new AKS();
+        int lower = (int)1, upper = (int)1e7;
+        Boolean[] sieve  = NumberTheory.sieve(upper);
+        for (int i=lower; i<=upper; i++) if (!sieve[i]) {
+            BigInteger n = BigInteger.valueOf(i);
+            int lgn = aks.calculateLogN(n);
+            int r = aks.calculateR(n,lgn);
+            Map<Integer, Integer> factors = NumberTheory.factorize(i);
+            boolean toProcess = true;
+            if (factors.size() == 1) toProcess = false;
+            else for (int p: factors.keySet()) if (p <= r) {
+                toProcess = false; break;
+            }
+            if (toProcess) assertEquals(false, aks.primalityTest(n));
+        }
     }
 
     public static void main(String[] args) {

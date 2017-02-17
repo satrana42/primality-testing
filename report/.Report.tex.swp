@@ -607,13 +607,25 @@ Step $3$ is gcd calcuation for numbers as large as $n$, so it can be done in $O(
 
 What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log n \rfloor = O(\log^{3.5}n)$ iterations. Each iterations involve exponentiation of polynomials. Each exponentiation takes $O(\log n)$ iterations. There are $O(r)$ terms in each polynomial, and coefficients are as large as $n$. So it takes \\$O({log^{3.5}n}\ .\ {\log n}\ .\ {r}\ .\ {\log n})= O(\log^{10.5}n)$. This step dominates the time complexity, and hence the time complexity of overall algorithm is $O(\log^{10.5}n)$
 
-\subsection{Simulations}
+\subsection{Implementation and Simulations}
 \begin{figure}
   \includegraphics[width=\linewidth]{pictures/n-r-l-5000.png}
   \caption{AKS simulations for $n \leq 5000$.}
   \label{fig:aks_5000}
 \end{figure}
-Figure~\ref{fig:aks_5000} represents the values of $r$, $\log n$ and $l$ against $n$ along the $x$-axis, for $n \leq 5000$. It can be seen that $r \sim \log^2 n$, and therefore $l \sim r$ in this range. Also, both $r$ and $l$ increase roughly in a step-fuction fashion along with $\log n$. 
+An implementation of AKS, in accordance to this text, can be found at \\\texttt{https://github.com/satwantrana/primality-testing}. The code works for input of arbitrary size. The present implementation uses Karatsuba multiplication algorithm for polynomial multiplication and thus the algorithm is slightly slower than the previously discussed complexity. 
+
+Figure~\ref{fig:aks_5000} represents the values of $r$, $\log n$ and $l$ against $n$ along the $x$-axis, for $n \leq 5000$. It can be seen that $r \sim \log^2 n$, and therefore $l \sim r$ in this range. These values are much smaller than the upper bound of $\log^5 n$ and much closer to the lower bound of $\log^2 n$. Also, both $r$ and $l$ increase roughly in a step-fuction fashion along with $\log n$. 
+
+Figure~\ref{fig:aks_2000} represents the time taken by the code to evaluate the primality of input $n$, for $n \leq 2000$. The expected number of iterations in the algorithm is $O(\log^{6.58} n)$, as $r \sim log^2 n$ and multiplication algorithm is Karatsuba. The observed runtimes suggest that the constant of complexity is $\sim 100$. We can expect a clever implementation to bring this number down. 
+
+The most expensive part of the algorithm is Step $5$, where $l$ equations in $\mathbb{Z}_n[X]/(X^r-1)$ have to be checked. All the numbers which fail this step are composite numbers with no prime factor $\leq r$. A simulation reveals that such $n \leq 1.4 \cdot 10^6$, fail the test at $a = 1$ itself. A further investigation in this direction can lead to smaller value for $l$, which can reduce the overall time complexity of the AKS primality test.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{pictures/n-time-2000.png}
+  \caption{AKS simulations for $n \leq 2000$.}
+  \label{fig:aks_2000}
+\end{figure}
 
 \begin{thebibliography}{9}
 \bibitem{riesel} 
