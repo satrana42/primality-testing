@@ -71,6 +71,17 @@ public class AKSSpec {
         }
     }
 
+    public boolean checkPolyEqn(BigInteger n, int r, int a) {
+        Polynomial left = new Polynomial(n, r);
+        left.setCoefficient(0, BigInteger.valueOf(a));
+        left.setCoefficient(1, BigInteger.valueOf(1));
+        left = left.exp(n);
+        Polynomial right = new Polynomial(n, r);
+        right.setCoefficient(0, BigInteger.valueOf(a));
+        right.setCoefficient(n, BigInteger.valueOf(1));
+        return left.equals(right);
+    }
+
     @Test
     public void RValueTest() {
         AKS aks = new AKS();
@@ -83,9 +94,11 @@ public class AKSSpec {
             for (int j=i+1;j<=upper;j++) if (sieve[j]) {
                 for (int k=j+1;k<=upper;k++) if (sieve[k]) {
                     BigInteger n = BigInteger.valueOf((long) i * j * k);
+
                     int lgn = aks.calculateLogN(n);
                     int r = aks.calculateR(n,lgn);
-                    System.out.println(n + " " + lgn + " " + r);
+                    System.out.println(n + " " + i + " " + j + " " + k + " " + lgn + " " + r);
+
                     Map<Integer, Integer> factors = NumberTheory.factorize(i*j*k);
                     boolean toProcess = true;
                     if (factors.size() == 1) toProcess = false;
@@ -93,11 +106,7 @@ public class AKSSpec {
                         System.out.println("F: " + n + " " + p);
                         toProcess = false; break;
                     }
-                    if (toProcess) {
-                        assertEquals(false, aks.primalityTest(n));
-                    } else {
-                        System.out.print(' ');
-                    }
+                    if (toProcess) assertEquals(false, aks.primalityTest(n));
                 }
             }
         }

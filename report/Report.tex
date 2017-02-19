@@ -629,26 +629,42 @@ The most expensive part of the algorithm is Step $5$, where $l$ equations in $\m
   \label{fig:aks_2000}
 \end{figure}
 
+\subsection{A modification of AKS}
+If we drop Step 1 from Algorithm~\ref{alg:AKSPrimalityTest}, then the false positives for the primality test can only be composite prime powers, and it becomes a probabilistic primality test. The following lemma describes a probabilistic version of AKS primality test whose false positives can only be composites with atmost $k$ distinct prime divisors.
+
 \begin{lemma}
 \label{lemma:AKSGenerelisation1}
-If it is known that $k$ distinct primes divide $n$, then the bounds of AKS Primality Test can be improved to the following,
+Given $k$ and $n$, the following modifications to AKS primality test, result in a probabilistic primality test whose false positives can only be composites with atmost $k$ distinct prime divisors.
 \begin{enumerate}[1.]%for capital roman numbers.
 \item Choice of $r$ is such that $o_r(n) > \log^{1 + \frac 1 {k}} n$.
 \item Such an $r$ would exist with $r \leq \log^{3 + \frac 2 {k}} n$.
-\item $l$ is improved to $l = \phi^\frac{1}{k+1}(r) \log n$.
-\item The overall time complexity is reduced to $\tilde O(\log^{3 + (3 + \frac{2}{k})(1 + \frac{1}{k+1})} n)$.
+\item $l$ is improved to $\lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$.
 \end{enumerate}
+Further, the modified algorithm runs in $\tilde O(\log^{3 + (3 + \frac{2}{k})(1 + \frac{1}{k+1})} n)$ time.
 \end{lemma}
+
 \begin{proof}
-Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test.
-If primes $p_i | n\ \forall \ 1 \leq i \leq k$, then we can iteratively deduce for increasing $j$,
+Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test. 
+
+In the general setting $r$ is defined to be the smallest natural which doesn't divide the product $P_k$ defined as,
+\[P_k = n^{\log B_k}\ .\ \prod_{i=1}^{\lfloor \log^{1 + \frac{1}{k}} n \rfloor}{n^i-1} \]
+where $B_k = \lceil \log^{3 + \frac{2}{k}} n \rceil$.
+
+If primes $p_i | n\ \forall \ 1 \leq i \leq k$, then it follows inductively on increasing $j$ that,
 \[(X+a)^{n/\prod_{i=1}^{i=j} p_i} \equiv X^{n/\prod_{i=1}^{i=j} p_i} + a \mod (n, X^r - 1)\]
 with $1 \leq j \leq k$, using the same arguments as section $14.3$. 
 
 Now, if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
-\[I' = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}} \ \vert \ 0 \leq i_j \leq \lfloor n^\frac{1}{k+1} \rfloor \}\]
-and redo the same analysis as the original algorithm, with the modified bounds, the result follows.
+\[I'_k = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}} \ \vert \ 0 \leq i_j \leq \lfloor n^\frac{1}{k+1} \rfloor \}\]
+and redo the same analysis as the original algorithm, with the corresponding modifications, the result follows.
 \end{proof}
+
+As it is, this modified version of AKS isn't very useful, for it's only nominally faster than original AKS. But we see that the choice of $r$ from original AKS satisfies the first two criteria here. Additionally, we know that, from the proof of Lemma~\ref{lemma:AKSGenerelisation1}, after $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations in Step $5$ of Algorithm~\ref{alg:AKSPrimalityTest}, the set of false positives is reduced only to composite $n$ with atmost $k$ distinct prime divisors.
+
+\begin{corollary} After $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations (from the beginning) in Step 5 of AKS Algorithm, the set of false positives is reduced to composite $n$ with atmost $k$ distinct prime divisors.
+\end{corollary}
+
+If we choose to stop at this point, it results in an $\tilde O(\log^{8 + \frac{5}{k+1}} n)$ time probabilistic primality test.
 
 \begin{thebibliography}{9}
 \bibitem{riesel} 

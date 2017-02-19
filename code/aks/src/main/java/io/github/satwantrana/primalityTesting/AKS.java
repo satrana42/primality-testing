@@ -24,7 +24,8 @@ public class AKS {
             int nn = n.mod(BigInteger.valueOf(r)).intValue();
             int cur = 1;
             boolean yes = true;
-            for (int j=1;j<=lgn*lgn;j++) {
+            int end = lgn*lgn;
+            for (int j=1;j<=end;j++) {
                 cur = (int) (cur*1L*nn)%r;
                 if (cur == 1) {
                     yes = false; break;
