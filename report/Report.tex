@@ -644,22 +644,80 @@ Further, the modified algorithm runs in $\tilde O(\log^{3 + (3 + \frac{2}{k})(1 
 \end{lemma}
 
 \begin{proof}
-Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test. 
+Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test. We consider the case $k > 1$ below.
 
-In the general setting $r$ is defined to be the smallest natural which doesn't divide the product $P_k$ defined as,
-\[P_k = n^{\log B_k}\ .\ \prod_{i=1}^{\lfloor \log^{1 + \frac{1}{k}} n \rfloor}{n^i-1} \]
-where $B_k = \lceil \log^{3 + \frac{2}{k}} n \rceil$. We can arrive at similar results as before, $(r, n) = 1$ and $r \leq \log^{3 + \frac 2 {k}} n$, using the exact same arguments.
+Before moving forward, for clarity, we present the modified algorithm as Algorithm~\ref{alg:AKSProbabilisticPrimalityTest}.
+
+\begin{algorithm}
+\caption{AKS Probabilistic Primality Test}
+\label{alg:AKSProbabilisticPrimalityTest}
+\begin{algorithmic}
+\Procedure{AKSProbabilisticPrimalityTest}{$n$} 
+
+\State $r \gets min \{i: i \in \mathbb{N},\ i \leq \max(3,\ \lceil \log^{3+\frac{2}{k}} n \rceil),\ o_i(n) > \log^{1+\frac{1}{k}} n \}$ \Comment {Step 1}
+
+\For {$a = 2$, $a \leq r$, $a \gets a+1$}
+	\If {$1 < (a,n) < n$}
+		\State \Return $false$  \Comment {Step 2}
+	\EndIf
+\EndFor
+
+\If {$n \leq r$}
+	\Return $true$  \Comment {Step 3}
+\EndIf
+
+\For {$a = 1$, $a \leq \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$, $a \gets a+1$}
+	\If {$(X+a)^n \not \equiv X^n + a \mod (n, X^r - 1)$}
+		\State \Return $false$  \Comment {Step 4}
+	\EndIf
+\EndFor
+\State \Return $true$ \Comment {Step 5}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Here note that, when the algorithm return $true$, it means that $n$ is a probabilistic prime, and composite otherwise. Let's assume, to the contrary, that $n$ has more than $k$ prime divisors, and the above algorithm labels it as a probabilistic prime. 
+
+Since Step $3$ returns $true$ only for primes, this can happen only in Step $5$. So we have that $(X+a)^n \equiv X^n + a \mod (n, X^r - 1)\ \forall\ 1 \leq a \leq l_k$.
+
+
+As in section $14.2$, we first show that $r$ exists. In this general setting $r$ is defined to be the smallest natural which doesn't divide the product $P$ defined as,
+\[P = n^{\log B_k}\ .\ \prod_{i=1}^{\lfloor \log^{1 + \frac{1}{k}} n \rfloor}{n^i-1} \]
+where $B_k = \lceil \log^{3 + \frac{2}{k}} n \rceil$. We can arrive at similar results as before, $(r, n) = 1$ and $r \leq \log^{3 + \frac 2 {k}} n$, using the exact same arguments from section $14.2$.
 
 If primes $p_i | n\ \forall \ 1 \leq i \leq k$, then it follows inductively on increasing $j$ that,
-\[(X+a)^{n/\prod_{i=1}^{i=j} p_i} \equiv X^{n/\prod_{i=1}^{i=j} p_i} + a \mod (n, X^r - 1)\]
-with $1 \leq j \leq k$, using the same arguments as section $14.3$. 
+\[(X+a)^{n/\prod_{i=1}^{j} p_i} \equiv X^{n/\prod_{i=1}^{j} p_i} + a \mod (n, X^r - 1)\]
+with $1 \leq j \leq k$, using the same arguments from section $14.3$.
 
-Now, if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
+Corresponding to $I$ in section $14.4$, we define
+\[I_k = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}}\ |\ i_j \in \mathbb{N}_0\ \forall\ 1\leq j \leq k+1 \}\]
+
+As before, every number‌ in $I_k$ is introspective for every polynomial in the set $P_k = \{\prod_{a=0}^{l_k}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$.
+
+Corresponding to $G$, the group $G_k$ is defined as set of residues of all elements of $I_k$ modulo $r$, with $t = |G| > log^{1+\frac{1}{k}}(n)$.
+
+And corresponding to $\mathcal{G}$, the group $\mathcal{G}_k$ is defined to be the set of all residues of polynomials in $P_k$ modulo $h(X)$ and $p$, where $p = p_1$ and $h(X)$ is the same as defined in section $14.4$. Note that, $|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}}$, using lemma~\ref{lemma:GLowerBound}.
+
+Coupled with the fact that more than $k$ primes divide $n$, if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
 \[I'_k = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}} \ \vert \ 0 \leq i_j \leq \lfloor n^\frac{1}{k+1} \rfloor \}\]
-and redo the same analysis as the original algorithm, with the corresponding modifications, the result follows.
+we can deduce that $|\mathcal{G}_k| \leq n^{t^{\frac{1}{k+1}}}$ with the same arguments.
+
+We finish off in the same fashion as before, 
+\[|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}}\]
+
+Using $t > \log^{1+\frac{1}{k}} n$, and therefore $t > t^{\frac{1}{k+1}} \log n$,
+\[|\mathcal{G}_k| \geq {{{\lfloor t^{\frac{1}{k+1}} \log n \rfloor} + 1 + l_k} \choose {\lfloor t^{\frac{1}{k+1}} \log n \rfloor}}\]
+
+Also $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor \geq \lfloor t^{\frac{1}{k+1}} \log{n} \rfloor$, and hence,
+\[|\mathcal{G}_k| \geq {{2{\lfloor t^{\frac{1}{k+1}} \log n \rfloor}+1} \choose {\lfloor t^{\frac{1}{k+1}} \log n \rfloor}}\]
+
+Using Lemma~\ref{lemma:CombinationsLemma},
+\[|\mathcal{G}_k| \geq 2^{{\lfloor t^{\frac{1}{k+1}} \log n \rfloor}+1} > 2^{t^{\frac{1}{k+1}} \log n} = n^{t^{\frac{1}{k+1}}}\]
+
+But we know that, $|\mathcal{G}_k| \leq n^{t^{\frac{1}{k+1}}}$, and therefore we arrive at a contradiction. Therefore $n$ can have atmost $k$ distinct prime divisors.
 \end{proof}
 
-As it is, this modified version of AKS isn't very useful, for it's only nominally faster than original AKS. But we see that the choice of $r$ from original AKS satisfies the first two criteria here. Additionally, we know that, from the proof of Lemma~\ref{lemma:AKSGenerelisation1}, after $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations in Step $5$ of Algorithm~\ref{alg:AKSPrimalityTest}, the set of false positives is reduced only to composite $n$ with atmost $k$ distinct prime divisors.
+In itself, this modified version of AKS isn't very useful, for it's only nominally faster than original AKS and allows for a (potentially) large set of false positives. But we see that the choice of $r$ from original AKS satisfies the first two criteria here. Additionally, we know that, from the proof of Lemma~\ref{lemma:AKSGenerelisation1}, after $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations in Step $5$ of Algorithm~\ref{alg:AKSPrimalityTest}, the set of false positives is reduced only to composite $n$ with atmost $k$ distinct prime divisors. This can be summarized as,
 
 \begin{corollary} After $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations (from the beginning) in Step 5 of AKS Algorithm, the set of false positives is reduced to composite $n$ with atmost $k$ distinct prime divisors.
 \end{corollary}
