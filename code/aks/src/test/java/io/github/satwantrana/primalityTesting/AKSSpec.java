@@ -112,6 +112,37 @@ public class AKSSpec {
         }
     }
 
+    @Test
+    public void IntrospectivityTest() {
+        AKS aks = new AKS();
+        int lower = (int)5, upper = (int)100;
+        Boolean[] sieve  = NumberTheory.sieve(upper);
+        for (int i=lower; i<=upper; i++) if (sieve[i]) {
+            BigInteger n = BigInteger.valueOf(i);
+            int lgn = aks.calculateLogN(n);
+            int r = aks.calculateR(n,lgn);
+            if (n.gcd(BigInteger.valueOf(r)).compareTo(BigInteger.ONE) > 0) continue;
+            int phiR = NumberTheory.phi(r);
+            int l = (int) (Math.sqrt(phiR)*lgn);
+            BigInteger pwr = n.add(n.pow(phiR)).subtract(BigInteger.ONE);
+            System.out.println(n + " " + r);
+            for (int a=1; a<=l; a++) {
+                Polynomial left = new Polynomial(n,r);
+                left.setCoefficient(0,BigInteger.valueOf(a));
+                left.setCoefficient(1,BigInteger.valueOf(1));
+                left = left.exp(pwr);
+
+                Polynomial right = new Polynomial(n,r);
+                right.setCoefficient(0,BigInteger.valueOf(a));
+                right.setCoefficient(pwr,BigInteger.valueOf(1));
+
+                if (!left.equals(right)) {
+                    assertTrue(false);
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Result result = JUnitCore.runClasses(AKSSpec.class);
 
