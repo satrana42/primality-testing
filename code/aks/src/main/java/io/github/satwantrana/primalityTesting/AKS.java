@@ -34,7 +34,7 @@ public class AKS {
             if (yes) return r;
         }
     }
-    public int calculateLogN(BigInteger n) {
+    public static int calculateLogN(BigInteger n) {
         return n.bitLength();
     }
     public boolean primalityTest(BigInteger n) {

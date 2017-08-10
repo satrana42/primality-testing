@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[11pt]{report}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -10,6 +10,7 @@
 \usepackage{mathtools}
 \usepackage{mathrsfs}
 \usepackage{graphicx}
+\usepackage[nottoc,numbib]{tocbibind}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
@@ -28,6 +29,9 @@
 
 \maketitle
 
+\tableofcontents{}
+
+\chapter{Introduction to Primality Testing}
 \section{Motivation}
 
 Prime numbers are central to Number Theory, acting as the atomic units around which all numbers are built. Therefore it is barely a surprise that \emph{Primality Testing} is a problem with a rich history in Number Theory. 
@@ -109,10 +113,10 @@ Given prime $p$, and $a \in \mathbb{Z}$, $(a,p) = 1$ we have,
 \end{theorem}
 
 \begin{proof}
-If $p \mid a$, then $a^p \equiv a \equiv 0 \mod p$, and we are done. Otherwise if $(a,p) = 1$, then list all the first $p-1$ multiples of $a$,
+We know that $(a,p) = 1$, now list of all the first $p-1$ multiples of $a$,
 \[ a, 2a, 3a, \dots (p-1)a\]
 
-All of these numbers are unique $\mod p$, for if $ia \equiv ja \mod p$ then since $(a,p) = 1$, we can cancel $a$ from both sides giving $i \equiv j \mod p$. So, the above numbers represent the following sequence in some order,
+All of these numbers are unique $\mod p$, for if $ia \equiv ja \mod p$ then since $(a,p) = 1$, we can cancel $a$ from both sides giving $i \equiv j \mod p$. So, the above numbers represent the following sequence, modulo $p$, in some order,
 \[ 1, 2, 3, \dots (p-1)\]
 
 We can equate the products of the sequences to get, 
@@ -272,7 +276,7 @@ It's easy to see that the algorithm takes $O(\log n)$ time.
 
 \section{Fermat's Theorem as a Probabilistic Primality Test}
 
-Once we have a compositeness test, we can run a it for a fixed number of times on the same number (with changing parameters). If we don't get indication of compositeness even a single time, then the probability of the given number being a composite is too low, and we have a \emph{Probabilistic Primality Test}. A probabilistic primality test thus indicates whether a number is composite or a \emph{probable prime}, i.e. a number which is prime with some (high) probability.
+Once we have a compositeness test, we can run it for a fixed number of times on the same number (with changing parameters). If we don't get indication of compositeness even a single time, then the probability of the given number being a composite is too low, and we have a \emph{Probabilistic Primality Test}. A probabilistic primality test thus indicates whether a number is composite or a \emph{probable prime}, i.e. a number which is prime with some (high) probability.
 
 This technique can be applied to Fermat's Compositeness Test, by changing the base $a$ on successive iterations, as seen in Algorithm~\ref{alg:FermatProbabilisticPrimalityTest}.
 
@@ -282,7 +286,7 @@ This technique can be applied to Fermat's Compositeness Test, by changing the ba
 \begin{algorithmic}
 \Procedure{FermatProbabilisticPrimalityTest}{$n, iter$} 
 \While {$iter > 0$} \Comment {$iter$ is number of iterations}
-	\State $a \gets \Call{Random}{0,n-1}$ \Comment {Random number in the range $[0,n-1]$}
+	\State $a \gets \Call{Random}{1,n-1}$ \Comment {Random number in the range $[1,n-1]$}
 	\State $check \gets \Call{FermatCompositenessTest}{a,n}$
 	\If {check}
 		\State \Return $false$ \Comment {Composite found}
@@ -296,7 +300,7 @@ This technique can be applied to Fermat's Compositeness Test, by changing the ba
 
 A small value of $iter = 20$ works well in practice, and thus we have an $O(\log n)$ algorithm.
 
-\section{Fermat's theorem as a Primality Test}
+\section{Fermat's theorem as a memoized Primality Test}
 When trying to convert a compositeness test into a primality test, the first obvious solution that comes to mind is to (somehow) maintain a table of all possible pseudoprimes within the range we wish to work on. Before running the actual test, one can lookup the table to see if the input number is a pseudoprime for the test, and label it as a composite right at the beginning of the test.
 
 The pseudoprimes for Fermat's Test also depend upon the base $a$ other than input $n$. D.H. Lehmer prepared a table of all Fermat pseudoprimes below $2.10^8$ for the base $2$ with no factor $< 317$. Thus a primality test to check primality for $n < 2.10^8$ can be formulated as Algorithm~\ref{alg:FermatPrimalityTest}.
@@ -321,6 +325,8 @@ The pseudoprimes for Fermat's Test also depend upon the base $a$ other than inpu
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+\chapter{A Polynomial Time Primality Test}
 
 \section{A Generalisation of Fermat's Little Theorem}
 Fermat's Little Theorem is only a necessary condition for a number to be prime, and therefore we can only formulate compositeness tests with it.
@@ -405,7 +411,7 @@ If $n$ is a prime, then Steps $1$ and $3$ can never return $false$. Also by disc
 \subsection{Is $n$ a perfect power?}
 The check for Step $1$ can be done in $O(\log^3 n)$ arithmetical operations. We need to find whether there exist $a, b \in \mathbb{N}, b \geq 2$ such that $n = a^b$. The idea is as follows. We iterate over all $1 \leq b \leq \log n$ and binary search for the root $a$ of the equation $n = a^b$. 
 
-We present the details in Algorithm~\ref{alg:PerfectPowerTest}. It involves $\log n$ iterations for $b$, $\log n$ iterations for binary search, and $\log n$ arithmetic operations for logarithmic exponentiation. So, overall it takes $O(\log^3 n)$ arithmetic operations to check if $n$ is a perfect power. Numbers can take as much as $\log n$ space, so it takes $\tilde O(\log n)$ time for arithmetic operations, and $\tilde O(\log^4 n)$ time overall. Here $\tilde O(f(n)) = O(f(n) \cdot \log^{\epsilon} f(n))$, for some constant $\epsilon$.
+We present the details in Algorithm~\ref{alg:PerfectPowerTest}. It involves $\log n$ iterations for $b$, $\log n$ iterations for binary search, and $\log b = \log \log n$ arithmetic operations for logarithmic exponentiation. So, overall it takes $\tilde O(\log^2 n)$ arithmetic operations to check if $n$ is a perfect power. Numbers can take as much as $\log n$ space, so it takes $\tilde O(\log n)$ time for arithmetic operations, and $\tilde O(\log^3 n)$ time overall. Here $\tilde O(f(n)) = O(f(n) \cdot \log^{\epsilon} f(n))$, for some constant $\epsilon$.
 
 \begin{algorithm}
 \caption{Perfect Power Test}
@@ -477,23 +483,23 @@ Now what remains to be shown is that if any of the equations in Step $5$ is $tru
 Or in other words $(X+a)^n = X^n + a$ in the ring $\mathbb{Z}_n[X]/(X^r-1)$ for all $0 \leq a \leq l$. Note that $X$ acts as a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$.
 
 From Theorem~\ref{theorem:GeneralisedFermatLittleTheorem},
-\[(X+a)^p \equiv X^p + a \mod (n,X^r-1)\]
+\[(X+a)^p \equiv X^p + a \mod (p,X^r-1)\]
 From $\dagger$ we have, 
 \[((X+a)^p)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \]
 By combining the last two equations we get,
-\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq l \]
+\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (p, X^r - 1)\ \forall\ 0 \leq a \leq l \]
 
 Since $X$ is a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$ and $(p,r) = 1$, $X^p$ is also a primitive $r^{th}$ root of unity in $\mathbb{Z}_n[X]/(X^r-1)$. So, $X = X^{pq}$, where $pq \equiv 1 \mod r$. Therefore,
-\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (n, (X^p)^r - 1)\ \forall\ 0 \leq a \leq l \] Conversely, every primitive $r^{th}$ root of unity can be arrived at in this fashion. And therefore,
-\[(X+a)^{\frac{n}{p}} \equiv X^{\frac{n}{p}} + a \mod (n, X^r - 1)\ \forall\ 0 \leq a \leq 
+\[(X^p+a)^{\frac{n}{p}} \equiv (X^p)^{\frac{n}{p}} + a \mod (p, (X^p)^r - 1)\ \forall\ 0 \leq a \leq l \] Conversely, every primitive $r^{th}$ root of unity can be arrived at in this fashion. And therefore,
+\[(X+a)^{\frac{n}{p}} \equiv X^{\frac{n}{p}} + a \mod (p, X^r - 1)\ \forall\ 0 \leq a \leq 
 l \]
 
-So we conclude that both $p$ and $\frac{n}{p}$ satisfy $\dagger$. The \emph{AKS} algorithm gives a name to this property,
+So we conclude that both $n$ and $\frac{n}{p}$ behave as prime $p$ in the above equation. The \emph{AKS} algorithm gives a name to this property,
 
 \begin{definition}
 \label{definition:introspective}
 For polynomial $f(X)$ and $m \in \mathbb{N}$, if $m$ satisfies
-\[f(X)^m \equiv f(X^m) \mod (n,X^r-1)\]
+\[f(X)^m \equiv f(X^m) \mod (p,X^r-1)\]
 then $m$ is said to be introspective for $f(X)$.
 \end{definition}
 
@@ -503,15 +509,15 @@ If $m$ and $m'$ are both introspective for a polynomial $f(X)$, then so is $m . 
 \end{lemma}
 \begin{proof}
 Since $m$ is introspective for $f(X)$, we have
-\[f(X)^m \equiv f(X^m) \mod (n, X^r-1)\]
+\[f(X)^m \equiv f(X^m) \mod (p, X^r-1)\]
 Substituting $X^{m'}$ for $X$ in the above equation, we have
-\[f(X^{m'})^m \equiv f((X^{m'})^m) \mod (n, (X^{m'})^r-1)\]
+\[f(X^{m'})^m \equiv f((X^{m'})^m) \mod (p, (X^{m'})^r-1)\]
 Also since $m'$ is introspective for $f(X)$, we have
-\[f(X)^{m'} \equiv f(X^{m'}) \mod (n, X^r-1)\]
+\[f(X)^{m'} \equiv f(X^{m'}) \mod (p, X^r-1)\]
 Combining the two equations, we get
-\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (n, X^{m'r}-1)\]
+\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (p, X^{m'r}-1)\]
 Since $X^{r}-1 | X^{m'r}-1$,
-\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (n, X^r-1)\]
+\[f(X)^{mm'} \equiv f(X^{mm'}) \mod (p, X^r-1)\]
 \end{proof}
 \begin{lemma}
 \label{lemma:IntrospectiveLemma2}
@@ -519,16 +525,16 @@ If $m$ is introspective for both the polynomials $f(X)$ and $g(X)$, then it is a
 \end{lemma}
 \begin{proof}
 We have,
-\[f(X)^m \equiv f(X^m) \mod (n, X^r-1)\]
-\[g(X)^m \equiv g(X^m) \mod (n, X^r-1)\]
+\[f(X)^m \equiv f(X^m) \mod (p, X^r-1)\]
+\[g(X)^m \equiv g(X^m) \mod (p, X^r-1)\]
 Multiplying together,
-\[f(X)^mg(X)^m \equiv f(X^m)g(X^m) \mod (n, X^r-1)\]
+\[f(X)^mg(X)^m \equiv f(X^m)g(X^m) \mod (p, X^r-1)\]
 which is nothing but,
-\[(f(X)g(X))^m \equiv f(X^m)g(X^m) \mod (n, X^r-1)\]
+\[(f(X)g(X))^m \equiv f(X^m)g(X^m) \mod (p, X^r-1)\]
 \end{proof}
 
 \subsection{About two groups}
-The previous two lemmas put together imply that the every number in the set $I = \{\frac{n}{p}^i.p^j\ |\ i,j \in \mathbb{N}_0\}$ for every polynomial in the set $P = \{\prod_{a=0}^{l}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$. These two sets help define two groups which play a vital role in the analysis of \emph{AKS}.
+The previous two lemmas put together imply that the every number in the set $I = \{\frac{n}{p}^i.p^j\ |\ i,j \in \mathbb{N}_0\}$ is introspective for every polynomial in the set $P = \{\prod_{a=0}^{l}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$. These two sets help define two groups which play a vital role in the analysis of \emph{AKS}.
 
 The first group is the set of residues of all elements of $I$ modulo $r$. Let's denote this set as $G$, and it is a subset of $\mathbb{Z}_r^*$ as $(n,r) = (p,r) = 1$. Let $t = |G|$. Since $n^i \in G \ \forall \ i \in \mathbb{N}_0$ and $o_r(n) > \log^2(n)$, we have $t > \log^2(n)$.
 
@@ -609,7 +615,7 @@ Step $3$ is gcd calcuation for numbers as large as $n$, so it can be done in $O(
 
 What remains of interest is Step $5$. There are $l = \lfloor \sqrt{\phi(r)} \log n \rfloor = O(r^{1/2} \log n)$ iterations. Each iterations involve exponentiation of polynomials. Each exponentiation takes $O(\log n)$ iterations. There are $O(r)$ terms in each polynomial, and coefficients are as large as $n$. So it takes $\tilde O({r^{3/2} \log^3 n})= \tilde O(\log^{10.5}n)$. This step dominates the time complexity, and hence the time complexity of overall algorithm is $\tilde O(\log^{10.5}n)$
 
-\subsection{Implementation and Simulations}
+\chapter{Implementation and Simulations}
 \begin{figure}
   \includegraphics[width=\linewidth]{pictures/n-r-l-5000.png}
   \caption{AKS simulations for $n \leq 5000$.}
@@ -629,100 +635,140 @@ The most expensive part of the algorithm is Step $5$, where $l$ equations in $\m
   \label{fig:aks_2000}
 \end{figure}
 
-\subsection{A modification of AKS}
-If we drop Step 1 from Algorithm~\ref{alg:AKSPrimalityTest}, then the false positives for the primality test can only be composite prime powers, and it becomes a probabilistic primality test. The following lemma describes a probabilistic version of AKS primality test whose false positives can only be composites with atmost $k$ distinct prime divisors.
+\chapter{Some results around AKS}
+\section{A generalisation of the AKS Primality Test}
+In Lemma~\ref{lemma:GUpperBound}, the upper bound for $|\mathcal{G}|$ is dictated by the size of $|G|$, which in turn is governed by how many elements are needed to generate $I$. If numbers not generated by $p$ and $\frac{n}{p}$ are introspective for the polynomials $X+a$, then we can hope to bring the upper bound for $|\mathcal{G}|$ down, which will reduce the number of equations $l$ that we need to test the primality of $n$. We present this idea in the following lemma.
 
-\begin{lemma}
-\label{lemma:AKSGenerelisation1}
-Given $k$ and $n$, the following modifications to AKS primality test, result in a probabilistic primality test whose false positives can only be composites with atmost $k$ distinct prime divisors.
-\begin{enumerate}[1.]%for capital roman numbers.
-\item Choice of $r$ is such that $o_r(n) > \log^{1 + \frac 1 {k}} n$.
-\item Such an $r$ would exist with $r \leq \log^{3 + \frac 2 {k}} n$.
-\item $l$ is improved to $\lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$.
+\begin{theorem}
+\label{theorem:GeneralisedAKS}
+Given $n, r \in \mathbb{N}$ and $S \subseteq \mathbb{N}$ such that,
+\begin{enumerate}[1.]
+\item $n$ can be written as a product of elements from $S$.
+\item $S$ is not generated, under multiplication, by a proper subset of $S$.
+\item $(n, r) = 1$ and $o_r(n) > \log^{1 + \frac 1 {k}} n$.
+\item $(X+a)^m \equiv X^m + a \mod (X^r-1, n)\ \forall \ m \in S$ and $1 \leq a \leq l_k$.
 \end{enumerate}
-Further, the modified algorithm runs in $\tilde O(\log^{3 + (3 + \frac{2}{k})(1 + \frac{1}{k+1})} n)$ time.
-\end{lemma}
+where $k = |S|$, $\displaystyle N = \prod_{m \in S} m$ and $l_k = \lfloor \phi(r)2^{log_n N}\rfloor$; then $n$ is power of a prime. 
 
-\begin{proof}
-Note that for $k=1$, these bounds are same as the ones mentioned in the AKS primality test. We consider the case $k > 1$ below.
+Further, such an $r$ exists which is prime with $r \leq \log^{3 + \frac{2}{k}} n$. Also, if $o_r(N) > log^{1 + \frac{1}{k}} N$, then $l_k$ gets improved to $\lfloor \phi(r)^\frac{1}{k+1} log N \rfloor$ with such an $r$ existing with $r \leq \log^{3 + \frac{2}{k}} N$.
 
-Before moving forward, for clarity, we present the modified algorithm as Algorithm~\ref{alg:AKSProbabilisticPrimalityTest}.
+Finally, the runtime of the algorithm is $\tilde O(l_k \cdot \log N \cdot r \cdot \log n)$
+\end{theorem}
 
 \begin{algorithm}
-\caption{AKS Probabilistic Primality Test}
-\label{alg:AKSProbabilisticPrimalityTest}
+\caption{Generalised AKS Primality Test}
+\label{alg:GeneralisedAKSPrimalityTest}
 \begin{algorithmic}
-\Procedure{AKSProbabilisticPrimalityTest}{$n$} 
+\Procedure{GeneralisedAKSPrimalityTest}{$n$, $S$}
 
-\State $r \gets min \{i: i \in \mathbb{N},\ i \leq \max(3,\ \lceil \log^{3+\frac{2}{k}} n \rceil),\ o_i(n) > \log^{1+\frac{1}{k}} n \}$ \Comment {Step 1}
+\If {$n < 2$ or $n = a^b$ for $a, b \in \mathbb{N}$ and $b \geq 2$}
+	\State \Return $false$  \Comment {Step 1}
+\EndIf
+
+\State $r \gets min \{i: i \in \mathbb{N},\ i \leq \lceil \log^{3+\frac{2}{k}} n \rceil,\ o_i(n) > \log^{1+\frac{1}{k}} n \}$ \Comment {Step 2}
 
 \For {$a = 2$, $a \leq r$, $a \gets a+1$}
 	\If {$1 < (a,n) < n$}
-		\State \Return $false$  \Comment {Step 2}
+		\State \Return $false$  \Comment {Step 3}
 	\EndIf
 \EndFor
 
 \If {$n \leq r$}
-	\Return $true$  \Comment {Step 3}
+	\Return $true$  \Comment {Step 4}
 \EndIf
 
-\For {$a = 1$, $a \leq \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$, $a \gets a+1$}
-	\If {$(X+a)^n \not \equiv X^n + a \mod (n, X^r - 1)$}
-		\State \Return $false$  \Comment {Step 4}
-	\EndIf
+\For {$a = 1$, $a \leq l_k$, $a \gets a+1$}
+	\For {$m \in S$}
+		\If {$(X+a)^m \not \equiv X^m + a \mod (n, X^r - 1)$}
+			\State \Return $false$  \Comment {Step 5}
+		\EndIf
+	\EndFor
 \EndFor
-\State \Return $true$ \Comment {Step 5}
+\State \Return $true$ \Comment {Step 6}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-Here note that, when the algorithm return $true$, it means that $n$ is a probabilistic prime, and composite otherwise. Let's assume, to the contrary, that $n$ has more than $k$ prime divisors, and the above algorithm labels it as a probabilistic prime. 
+\begin{proof}
+Note that for $S = \{n\}$, these bounds are same as those in the AKS primality test. In the remainder of this proof, we proceed to prove that $n$ is a prime if and only if Algorithm~\ref{alg:generalisedAKSPrimalityTest} returns $true$ (in the same fashion as the proof of AKS), along with the proof of the lemma.
 
-Since Step $3$ returns $true$ only for primes, this can happen only in Step $5$. So we have that $(X+a)^n \equiv X^n + a \mod (n, X^r - 1)\ \forall\ 1 \leq a \leq l_k$.
+As in section $2.3.2$, we first show that $r$ exists. In this general setting $r$ is defined to be the smallest natural which doesn't divide the product $P$ defined as,
+\[P = n^{\log B}\ .\ \prod_{i=1}^{\lfloor \log^{1 + \frac{1}{k}} n \rfloor}{n^i-1} \]
+where $B = \lceil \log^{3 + \frac{2}{k}} n \rceil$. We can arrive at similar results as before, $(r, n) = 1$ and $r \leq \log^{3 + \frac 2 {k}} n$, using the exact same arguments from section $2.3.2$. Note that, since $r$ is defined to be the smallest such natural, it has to be a prime number. Also, if we replace $n$ with $N$ in $P$, then we get the upper bound on $r$ for the case $o_r(N) > log^{1 + \frac{1}{k}} N$.
 
+If $n$ is a prime, then by the definition of primality, the algorithm can't return $false$ at Step $1$ or Step $3$. Also we are given that $(X+a)^m \equiv X^m + a \mod (X^r-1, n)\ \forall \ m \in S$ and $1 \leq a \leq l_k$, so it can't return $false$ on Step $5$. Therefore the algorithm returns $true$ for prime $n$.
 
-As in section $14.2$, we first show that $r$ exists. In this general setting $r$ is defined to be the smallest natural which doesn't divide the product $P$ defined as,
-\[P = n^{\log B_k}\ .\ \prod_{i=1}^{\lfloor \log^{1 + \frac{1}{k}} n \rfloor}{n^i-1} \]
-where $B_k = \lceil \log^{3 + \frac{2}{k}} n \rceil$. We can arrive at similar results as before, $(r, n) = 1$ and $r \leq \log^{3 + \frac 2 {k}} n$, using the exact same arguments from section $14.2$.
+Now we prove that if the algorithm returns $true$, then $n$ must be a prime. It is obvious that $n$ is a prime if it returns $true$ at Step $4$. What remains to be shown is that $n$ is a prime if it returns $true$ at Step $6$, which is the premise of the lemma.
 
-If primes $p_i | n\ \forall \ 1 \leq i \leq k$, then it follows inductively on increasing $j$ that,
-\[(X+a)^{n/\prod_{i=1}^{j} p_i} \equiv X^{n/\prod_{i=1}^{j} p_i} + a \mod (n, X^r - 1)\]
-with $1 \leq j \leq k$, using the same arguments from section $14.3$.
+Let $p$ be a prime that divides $n$. Since $(n,r) = 1$, we have $(p,r) = 1$. We fix $p$ and $r$ for the remainder of the proof, and assume that $n$ is not a power of $p$.
 
-Corresponding to $I$ in section $14.4$, we define
-\[I_k = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}}\ |\ i_j \in \mathbb{N}_0\ \forall\ 1\leq j \leq k+1 \}\]
+We are given that $(X+a)^m \equiv X^m + a \mod (X^r-1, n)\ \forall \ m \in S$ and $1 \leq a \leq l_k$. In other words, every $m \in S$ is introspective for the polynomials $X+a\ \forall \ 1 \leq a \leq l_k$. Since introspectivity is closed under multiplication, and that $n$ can be written as a product of elements of $S$, we have that $(X+a)^n \equiv X^n + a \mod (X^r-1, n)$. Since $p | n$, we can re-write this as $(X+a)^n \equiv X^n + a \mod (X^r-1, p)$, and therefore $(X+a)^\frac{n}{p} \equiv X^\frac{n}{p} + a \mod (X^r-1, p)$.
+
+Corresponding to $I$ in section $2.3.4$, we define
+\[I_k = \{ \prod_{m \in S, m \neq n} m^{i_m} \cdot p^{i_p} \cdot \frac{n}{p}^{i_\frac{n}{p}}\ |\ i_m \in \mathbb{N}_0\ \forall\ m \in S / \{n\} \cup \{p, \frac{n}{p}\} \}\]
 
 As before, every number‌ in $I_k$ is introspective for every polynomial in the set $P_k = \{\prod_{a=0}^{l_k}{(X+a)^{e_a}}\ |\ e_a \in \mathbb{N}_0\}$.
 
 Corresponding to $G$, the group $G_k$ is defined as set of residues of all elements of $I_k$ modulo $r$, with $t = |G| > log^{1+\frac{1}{k}}(n)$.
 
-And corresponding to $\mathcal{G}$, the group $\mathcal{G}_k$ is defined to be the set of all residues of polynomials in $P_k$ modulo $h(X)$ and $p$, where $p = p_1$ and $h(X)$ is the same as defined in section $14.4$. Note that, $|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}}$, using lemma~\ref{lemma:GLowerBound}.
+And corresponding to $\mathcal{G}$, the group $\mathcal{G}_k$ is defined to be the set of all residues of polynomials in $P_k$ modulo $h(X)$ and $p$, where $h(X)$ is the same as defined in section $2.3.4$. Note that, $|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}}$, using lemma~\ref{lemma:GLowerBound}.
 
-Coupled with the fact that more than $k$ primes divide $n$, if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
-\[I'_k = \{ \prod_{j=1}^{k}p_j^{i_j} \cdot (n/\prod_{j=1}^{k}p_j)^{i_{k+1}} \ \vert \ 0 \leq i_j \leq \lfloor n^\frac{1}{k+1} \rfloor \}\]
-we can deduce that $|\mathcal{G}_k| \leq n^{t^{\frac{1}{k+1}}}$ with the same arguments.
+Coupled with the facts that $n$ is not a power of $p$, and that no proper subset of $S$ generates $S$; if we modify $I'$ in Lemma~\ref{lemma:GUpperBound} to,
+\[I'_k = \{ \prod_{m \in S, m \neq n} m^{i_m} \cdot p^{i_p} \cdot \frac{n}{p}^{i_\frac{n}{p}}\ |\ 0 \leq i_m \leq \lfloor t^\frac{1}{k+1} \rfloor \}\]
+we can deduce that $|\mathcal{G}_k| \leq N^{t^{\frac{1}{k+1}}}$ with the same arguments.
 
-We finish off in the same fashion as before, 
+If $o_r(N) > log^{1 + \frac{1}{k}} N$, we finish off in the same fashion as before, 
 \[|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}}\]
-
-Using $t > \log^{1+\frac{1}{k}} n$, and therefore $t > t^{\frac{1}{k+1}} \log n$,
-\[|\mathcal{G}_k| \geq {{{\lfloor t^{\frac{1}{k+1}} \log n \rfloor} + 1 + l_k} \choose {\lfloor t^{\frac{1}{k+1}} \log n \rfloor}}\]
-
-Also $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor \geq \lfloor t^{\frac{1}{k+1}} \log{n} \rfloor$, and hence,
-\[|\mathcal{G}_k| \geq {{2{\lfloor t^{\frac{1}{k+1}} \log n \rfloor}+1} \choose {\lfloor t^{\frac{1}{k+1}} \log n \rfloor}}\]
-
+Using $t > \log^{1+\frac{1}{k}} N$, and therefore $t > t^{\frac{1}{k+1}} \log N$,
+\[|\mathcal{G}_k| \geq {{{\lfloor t^{\frac{1}{k+1}} \log N \rfloor} + 1 + l_k} \choose {\lfloor t^{\frac{1}{k+1}} \log N \rfloor}}\]
+Also $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log N \rfloor \geq \lfloor t^{\frac{1}{k+1}} \log{N} \rfloor$, and therefore,
+\[|\mathcal{G}_k| \geq {{2{\lfloor t^{\frac{1}{k+1}} \log N \rfloor}+1} \choose {\lfloor t^{\frac{1}{k+1}} \log N \rfloor}}\]
 Using Lemma~\ref{lemma:CombinationsLemma},
-\[|\mathcal{G}_k| \geq 2^{{\lfloor t^{\frac{1}{k+1}} \log n \rfloor}+1} > 2^{t^{\frac{1}{k+1}} \log n} = n^{t^{\frac{1}{k+1}}}\]
+\[|\mathcal{G}_k| \geq 2^{{\lfloor t^{\frac{1}{k+1}} \log N \rfloor}+1} > 2^{t^{\frac{1}{k+1}} \log N} = N^{t^{\frac{1}{k+1}}}\]
+But we know that, $|\mathcal{G}_k| \leq N^{t^{\frac{1}{k+1}}}$, and therefore we arrive at a contradiction, and hence $n$ is a power of $p$.
 
-But we know that, $|\mathcal{G}_k| \leq n^{t^{\frac{1}{k+1}}}$, and therefore we arrive at a contradiction. Therefore $n$ can have atmost $k$ distinct prime divisors.
+Otherwise,
+\[|\mathcal{G}_k| \geq {{t+l_k} \choose {t-1}} \geq (\frac{t+l_k}{t-1})^{t-1}\]
+Since $l_k \geq \phi(r)2^{log_n(N)}$ and $\phi(r) \geq t \geq \log^{1 + \frac{1}{k}}n$,
+\[l_k \geq tN^{t^{-\frac{k}{k+1}}} > (t-1)(N^{t^{-\frac{k}{k+1}}}-1)-1\]
+Combining the above two equations,
+\[|\mathcal{G}_k| > N^{t^\frac{1}{k+1}}\]
+which leads us to the same contradiction.
+
+With regards to Algorithm~\ref{alg:GeneralisedAKSPrimalityTest}, we know that $n$ has to be a prime, otherwise it would have returned $false$ at Step $1$. 
 \end{proof}
 
-In itself, this modified version of AKS isn't very useful, for it's only nominally faster than original AKS and allows for a (potentially) large set of false positives. But we see that the choice of $r$ from original AKS satisfies the first two criteria here. Additionally, we know that, from the proof of Lemma~\ref{lemma:AKSGenerelisation1}, after $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations in Step $5$ of Algorithm~\ref{alg:AKSPrimalityTest}, the set of false positives is reduced only to composite $n$ with atmost $k$ distinct prime divisors. This can be summarized as,
 
-\begin{corollary} After $l_k = \lfloor \phi^\frac{1}{k+1}(r) \log n \rfloor$ iterations (from the beginning) in Step 5 of AKS Algorithm, the set of false positives is reduced to composite $n$ with atmost $k$ distinct prime divisors.
+\section{More introspective numbers}
+The whole basis of Theorem~\ref{theorem:GeneralisedAKS} is the intuition that there exist more introspective numbers. We try to prove the existence of an infinite set of such numbers, which are comprime to $n$, in the following results.
+
+\begin{lemma}
+\label{lemma:MoreIntrospectiveNumbers}
+Given distinct primes $n$, $r \in \mathbb{N}$, then $\forall f(X) \in \mathbb{Z}[X]$,
+\[f(X)^{n^{\phi(r)}-1} \equiv 1 \mod (n, X^r - 1)\]
+\end{lemma}
+\begin{proof}
+Let $p(X) = X^r - 1$, and hence it's derivative $p'(X) = rX^{r-1}$. Now, in $\mathbb{Z}_n[X]$, $(rp(X), p'(X)) = (X.p'(X)-r.p(X), p'(X)) = (r, p'(X)) = r$, and therefore $(p(X), p'(X)) = 1$. Therefore, $p(X) = X^r - 1$ when factorized into irreducibles in $\mathbb{Z}_n[X]$, doesn't have any repeated factors.
+
+We know that, since $r$ is prime, $p(X) = (X-1)Q_r(X)$, where $Q_r(X)$ is the $r^{th}$ cyclotomic polynomial. Also from Section $2.3.3$, we know that $Q_r(X)$ factors into irreducibles of degree $o_r(n)$ in $\mathbb{Z}_n$. So, let $p(X) = \prod_i q_i(X)$ in $\mathbb{Z}_n[X]$ where $q_i$'s are irreducibles in $\mathbb{Z}_n[X]$ and $q_0(X) = X-1$.
+
+Now, fix $q_i(X)$ and let $f(X) \in \mathbb{Z}[X]$. Since $\mathbb{F} = Z_n[X]/(q_i(X))$ is a field, $f(X)^{n^d - 1} = 1$ in $\mathbb{F}$, where $d = deg(q_i)$. As $deg(q_i)\ |\ \phi(r)\ \forall\ i$, and therefore $n^d - 1\ |\ n^{\phi(r)} - 1$, we have $f(X)^{n^{\phi(r)} - 1} = 1$ in $\mathbb{F}$. 
+
+Or in other words, $f(X)^{n^{\phi(r)} - 1} \equiv 1 \mod q_i(X)$ in $\mathbb{Z}_n[X]$. Now since $q_i(X)\ |\ f(X)^{n^{\phi(r)} - 1} - 1$ for every irreducible factor $q_i(X)$ of $X^r - 1$, we have that $X^r - 1\ |\ f(X)^{n^{\phi(r)} - 1} - 1$ in $\mathbb{Z}_n[X]$.
+\end{proof}
+
+\begin{corollary}
+\label{corollary:MoreIntrospectiveNumbersCorollary}
+If $n$ and $r$ are primes, then $\{n + \lambda (n^{\phi(r)} - 1): (\lambda, n) = 1 \}$ is an infinite set of introspective numbers, all of which are coprime to $n$, for all polynomials $f(X) \in \mathbb{Z}[X]$.
 \end{corollary}
+\begin{proof}
+The result follows immediately by Theorem~\ref{theorem:GeneralisedFermatLittleTheorem} and Lemma~\ref{lemma:MoreIntrospectiveNumbers}. Note that since $(n, n^{\phi(r)} - 1) = 1$ and $(n, \lambda) = 1$, we have $(n, n + \lambda (n^{\phi(r)} - 1)) = 1$.
+\end{proof}
 
-If we choose to stop at this point, it results in an $\tilde O(\log^{8 + \frac{5}{k+1}} n)$ time probabilistic primality test.
+It should be noted that, using even the smallest number $n + n^{\phi(r)} - 1$ from the above set in Theorem~\ref{theorem:GeneralisedAKS} doesn't lead to a polynomial time algorithm. But at the same time, owing to the weak bounds in Theorem~\ref{theorem:GeneralisedAKS}, one could hope to find smaller introspective numbers, possibly for specific classes of numbers $n$, which in turn may lead to asymptotically better versions of the AKS primality test.
+
+\chapter{Conclusion}
+In this document, we started with naive primality tests and eventually ended up exploring one of the fundamental results in number theoretic algorithms. An intricate understanding of the AKS algorithm led to us to tweak various parameters of the algorithm, and eventually some original work in a direction to generalise the algorithm. As discussed before this generalisation may lead to asymptotically better versions of the AKS algorithms, for specific classes of numbers.
 
 \begin{thebibliography}{9}
 \bibitem{riesel} 
@@ -732,7 +778,6 @@ Riesel, Hans.
 \bibitem{aks} 
 Agrawal, Manindra; Kayal, Neeraj; Saxena, Nitin. \textit{PRIMES is in P}. Annals of Mathematics, 2004.
 
- 
 \bibitem{wikipedia} 
 Wikipedia: Primality tests.
 \\\texttt{https://en.wikipedia.org/wiki/Primality\_test}

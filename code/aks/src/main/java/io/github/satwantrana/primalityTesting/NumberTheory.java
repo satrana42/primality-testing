@@ -7,6 +7,10 @@ import java.util.Map;
  * Created by satwant on 12/2/17.
  */
 public class NumberTheory {
+    static int gcd (int a, int b) {
+        return b != 0 ? gcd(b, a%b) : a;
+    }
+
     static int phi(int n) {
         int res = 1;
         for (int i=2;i<=n/i;i++) {
@@ -21,6 +25,18 @@ public class NumberTheory {
         }
         if (n > 1) res *= n-1;
         return res;
+    }
+
+    static int modPow (int a, int n, int m) { // a^n % m
+        int ret = 1;
+        a %= m;
+        if (a < 0) a += m;
+        while (n > 0) {
+            if ((n&1) > 0) ret = (int) ((ret*1l*a) % m);
+            a = (int) ((a*1l*a) % m);
+            n >>= 1;
+        }
+        return ret;
     }
 
     static Boolean[] sieve(int n) {

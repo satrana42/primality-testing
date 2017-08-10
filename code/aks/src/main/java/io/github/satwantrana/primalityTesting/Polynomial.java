@@ -55,6 +55,9 @@ public class Polynomial {
         if (cur.compareTo(BigInteger.ZERO) < 0) cur = cur.add(n);
         poly.set(i,cur);
     }
+    public void addCoefficient(BigInteger i, BigInteger inc) {
+        addCoefficient(i.mod(BigInteger.valueOf(r)).intValue(), inc);
+    }
     public void subCoefficient(int i, BigInteger dec) {
         addCoefficient(i,dec.negate());
     }
